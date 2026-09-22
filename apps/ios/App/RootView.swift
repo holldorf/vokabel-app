@@ -183,7 +183,7 @@ struct TalkView: View {
             Button { coordinator.toggleMeaning() } label: {
                 VStack(spacing: 6) {
                     Image(systemName: coordinator.store.preferences.meaningVisible ? "captions.bubble.fill" : "captions.bubble")
-                        .frame(width: 48, height: 48).modifier(SoftGlass(tint: coordinator.store.preferences.meaningVisible ? MuralColor.butter.opacity(0.7) : .white.opacity(0.4)))
+                        .frame(width: 48, height: 48).modifier(SoftGlass(tint: coordinator.store.preferences.meaningVisible ? MuralColor.butter.opacity(0.7) : MuralColor.surface))
                     Text("Meaning").font(.caption2)
                 }.contentShape(Rectangle())
             }.buttonStyle(.plain)
@@ -194,7 +194,7 @@ struct TalkView: View {
                 else if !coordinator.isRunning { coordinator.start() }
             } label: {
                 ZStack {
-                    Circle().fill(LinearGradient(colors: [Color(red: 1, green: 0.73, blue: 0.48), MuralColor.orange], startPoint: .topLeading, endPoint: .bottomTrailing))
+                    Circle().fill(LinearGradient(colors: [MuralColor.burgundy, MuralColor.orange], startPoint: .topLeading, endPoint: .bottomTrailing))
                     if coordinator.state == .connecting || coordinator.state == .closing { ProgressView().tint(MuralColor.ink) }
                     else { Image(systemName: coordinator.isMuted && coordinator.state == .active ? "mic.slash" : "mic").font(.system(size: 28, weight: .regular)).contentTransition(.symbolEffect(.replace)) }
                 }.frame(width: 76, height: 76).shadow(color: MuralColor.orange.opacity(0.25), radius: 10, y: 6)
@@ -248,7 +248,7 @@ struct TypedReplyView: View {
             ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 Text("Say it your way.").font(.system(.title, design: .rounded, weight: .semibold)).fixedSize(horizontal: false, vertical: true)
-                TextField("Reply in \(coordinator.language.name) or another language", text: $text, axis: .vertical).lineLimit(3...6).focused($focused).padding(18).background(.white, in: RoundedRectangle(cornerRadius: 22)).accessibilityIdentifier("typed-reply-input")
+                TextField("Reply in \(coordinator.language.name) or another language", text: $text, axis: .vertical).lineLimit(3...6).focused($focused).padding(18).background(MuralColor.surface, in: RoundedRectangle(cornerRadius: 22)).accessibilityIdentifier("typed-reply-input")
                     .onChange(of: text) { _, _ in coordinator.noteTypingActivity() }
                 if let error = coordinator.typedReplyError {
                     Text(error).font(.footnote).foregroundStyle(MuralColor.secondary).fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("typed-reply-error")

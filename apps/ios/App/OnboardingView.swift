@@ -124,10 +124,10 @@ struct OnboardingView: View {
                             }
                             Spacer()
                             Image(systemName: targetID == language.id ? "checkmark.circle.fill" : "circle")
-                                .font(.title3).foregroundStyle(targetID == language.id ? MuralColor.orange : MuralColor.secondary.opacity(0.4))
+                                .font(.title3).foregroundStyle(targetID == language.id ? MuralColor.accent : MuralColor.secondary)
                         }.padding(.horizontal, 18).padding(.vertical, 13).frame(maxWidth: .infinity)
-                            .background(targetID == language.id ? .white.opacity(0.92) : .white.opacity(0.52), in: RoundedRectangle(cornerRadius: 22))
-                            .overlay { RoundedRectangle(cornerRadius: 22).strokeBorder(targetID == language.id ? MuralColor.orange.opacity(0.55) : .clear, lineWidth: 1.5) }
+                            .background(targetID == language.id ? MuralColor.peach : MuralColor.surface, in: RoundedRectangle(cornerRadius: 22))
+                            .overlay { RoundedRectangle(cornerRadius: 22).strokeBorder(targetID == language.id ? MuralColor.accent : MuralColor.border, lineWidth: 1.5) }
                     }.buttonStyle(.plain)
                         .accessibilityLabel(language.settingsTitle)
                         .accessibilityAddTraits(targetID == language.id ? .isSelected : [])
@@ -149,7 +149,7 @@ struct OnboardingView: View {
                 ForEach(MeaningLanguages.all, id: \.self) { Text($0).tag($0) }
             }.pickerStyle(.menu).font(.system(.headline, design: .rounded))
                 .padding(20).frame(maxWidth: .infinity)
-                .background(.white.opacity(0.8), in: RoundedRectangle(cornerRadius: 22))
+                .background(MuralColor.surface, in: RoundedRectangle(cornerRadius: 22))
                 .accessibilityIdentifier("onboarding-meaning-picker")
             VStack(spacing: 8) {
                 Text(target.greeting).font(.system(.title2, design: .rounded, weight: .medium))

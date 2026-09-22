@@ -363,7 +363,7 @@ fun TranscriptDialog(vm: MuralViewModel, session: SessionRecord, onDismiss: () -
                     item { Text(stringResource(R.string.history_saved_sources), fontWeight = FontWeight.SemiBold) }
                     items(sources) { source ->
                         val uriHandler = LocalUriHandler.current
-                        Text("↗ ${source.title}", color = MuralColors.Orange, modifier = Modifier.clickable { source.safeUrl()?.let(uriHandler::openUri) }.padding(vertical = 6.dp))
+                        Text("↗ ${source.title}", color = MuralColors.Accent, modifier = Modifier.clickable { source.safeUrl()?.let(uriHandler::openUri) }.padding(vertical = 6.dp))
                     }
                 }
                 item { MuralTextButton(onClick = onDismiss, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.common_close)) } }

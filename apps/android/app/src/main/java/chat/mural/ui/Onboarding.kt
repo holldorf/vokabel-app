@@ -9,7 +9,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -206,8 +205,8 @@ private fun LanguageDropdown(title: String, subtitle: String, tag: String,
                              options: @Composable androidx.compose.foundation.layout.ColumnScope.(close: () -> Unit) -> Unit) {
     var expanded by rememberSaveable { mutableStateOf(false) }
     Box(Modifier.fillMaxWidth()) {
-        Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp)).background(Color.White.copy(alpha = .78f))
-            .border(1.dp, Color.White.copy(alpha = .9f), RoundedCornerShape(24.dp))
+        Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp)).background(MuralColors.Surface)
+            .border(1.dp, MuralColors.Border, RoundedCornerShape(24.dp))
             .clickable(role = Role.Button) { expanded = true }.testTag(tag).padding(horizontal = 22.dp, vertical = 19.dp),
             verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {

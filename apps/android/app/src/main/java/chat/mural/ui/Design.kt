@@ -6,6 +6,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,13 +14,16 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -45,24 +49,29 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 object MuralColors {
-    val Cream = Color(0xFFFFF9EE)
-    val CreamRaised = Color(0xFFFFFDF8)
-    val Surface = Color(0xFFFFFFFF)
-    val SurfaceBright = Color(0xFFFFF2E6)
-    val Ink = Color(0xFF362A22)
-    val Secondary = Color(0xFF735B4A)
-    val Orange = Color(0xFFFF8A4D)
-    val Peach = Color(0xFFFFE3CF)
-    val Lilac = Color(0xFFEEE6FA)
-    val Sage = Color(0xFFEAEFD6)
-    val Butter = Color(0xFFFFF1C7)
-    val Red = Color(0xFFB34B3F)
+    // Legacy token names are retained so all existing screens share the theme.
+    val Cream = Color(0xFF180A10)
+    val CreamRaised = Color(0xFF251019)
+    val Surface = Color(0xFF32131F)
+    val SurfaceBright = Color(0xFF482032)
+    val Ink = Color(0xFFFFF7F0)
+    val Secondary = Color(0xFFD6B9C3)
+    val Orange = Color(0xFFB94B70)
+    val Peach = Color(0xFF482032)
+    val Lilac = Color(0xFF392139)
+    val Sage = Color(0xFF3C2730)
+    val Butter = Color(0xFF512133)
+    val Red = Color(0xFFFFB4AB)
+    val Border = Color(0xFF946575)
+    val Burgundy = Color(0xFF80102F)
+    val Rose = Color(0xFFD38FA4)
+    val Accent = Color(0xFFE5A0B5)
     val Panels = listOf(Peach, Lilac, Sage, Butter)
 }
 
-private val MuralScheme = lightColorScheme(
-    primary = MuralColors.Orange,
-    onPrimary = MuralColors.Ink,
+private val MuralScheme = darkColorScheme(
+    primary = MuralColors.Accent,
+    onPrimary = MuralColors.Cream,
     primaryContainer = MuralColors.Peach,
     onPrimaryContainer = MuralColors.Ink,
     secondary = MuralColors.Secondary,
@@ -72,7 +81,17 @@ private val MuralScheme = lightColorScheme(
     onSurface = MuralColors.Ink,
     surfaceVariant = MuralColors.SurfaceBright,
     onSurfaceVariant = MuralColors.Secondary,
+    outline = MuralColors.Border,
+    outlineVariant = MuralColors.Border.copy(alpha = .55f),
+    surfaceContainerLowest = MuralColors.Cream,
+    surfaceContainerLow = MuralColors.CreamRaised,
+    surfaceContainer = MuralColors.Surface,
+    surfaceContainerHigh = MuralColors.SurfaceBright,
+    surfaceContainerHighest = MuralColors.Butter,
     error = MuralColors.Red,
+    onError = MuralColors.Cream,
+    errorContainer = MuralColors.Peach,
+    onErrorContainer = MuralColors.Red,
 )
 
 @OptIn(androidx.compose.ui.text.ExperimentalTextApi::class)
@@ -116,13 +135,22 @@ fun MuralTheme(content: @Composable () -> Unit) {
             extraLarge = androidx.compose.foundation.shape.RoundedCornerShape(36.dp)), content = content)
 }
 
+/** Decorative inside a parent that supplies the accessible app name. */
+@Composable
+fun BrandMark(modifier: Modifier = Modifier) {
+    Image(
+        painter = painterResource(R.drawable.holldorf_logo),
+        contentDescription = null,
+        modifier = modifier.clip(RoundedCornerShape(percent = 22)),
+    )
+}
+
 @Composable
 fun Brand(modifier: Modifier = Modifier) {
     val appName = stringResource(R.string.app_name)
     Row(modifier = modifier.semantics(mergeDescendants = true) { contentDescription = appName },
         horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-        Box(Modifier.size(17.dp).background(Brush.radialGradient(
-            listOf(MuralColors.Butter, MuralColors.Orange), center = Offset.Zero, radius = 48f), CircleShape))
+        BrandMark(Modifier.size(36.dp))
         Text(stringResource(R.string.app_wordmark), style = rounded(18, 22, FontWeight.ExtraBold), color = MuralColors.Ink)
     }
 }
@@ -213,15 +241,15 @@ fun MuralOrb(energy: Float = 0f, listening: Boolean = false, active: Boolean = t
             drawPath(path, shader.brush(size, phase))
         } else {
             clipPath(path) {
-                drawRect(Brush.linearGradient(listOf(MuralColors.Butter, MuralColors.Orange, Color(0xFFFDA079)), Offset.Zero, Offset(size.width * .45f, size.height)))
-                drawRect(Brush.radialGradient(listOf(Color(0xFFCDADEB), Color(0x00CDADEB)), Offset(size.width, size.height * .6f), side * .85f))
-                drawRect(Brush.radialGradient(listOf(Color(0x99FFF5D6), Color(0x00FFF5D6)), Offset(side * .22f, side * .2f), side * .5f))
+                drawRect(Brush.linearGradient(listOf(MuralColors.Ink, MuralColors.Rose, MuralColors.Burgundy), Offset.Zero, Offset(size.width * .45f, size.height)))
+                drawRect(Brush.radialGradient(listOf(MuralColors.Rose, MuralColors.Rose.copy(alpha = 0f)), Offset(size.width, size.height * .6f), side * .85f))
+                drawRect(Brush.radialGradient(listOf(MuralColors.Ink.copy(alpha = .6f), MuralColors.Ink.copy(alpha = 0f)), Offset(side * .22f, side * .2f), side * .5f))
             }
         }
-        drawCircle(Brush.radialGradient(listOf(Color.White, MuralColors.Peach, MuralColors.Orange.copy(alpha = .5f)),
+        drawCircle(Brush.radialGradient(listOf(MuralColors.Ink, MuralColors.Rose, MuralColors.Burgundy.copy(alpha = .5f)),
             Offset(center.x + side * .54f - 3.dp.toPx(), center.y - side * .24f - 3.dp.toPx()), 12.dp.toPx()),
             6.dp.toPx(), Offset(center.x + side * .55f, center.y - side * .24f))
-        drawCircle(MuralColors.Peach, 3.5.dp.toPx(), Offset(center.x - side * .54f, center.y + side * .26f))
+        drawCircle(MuralColors.Rose, 3.5.dp.toPx(), Offset(center.x - side * .54f, center.y + side * .26f))
     }
 }
 
@@ -237,9 +265,9 @@ private class OrbMesh {
             float2 uv = point / resolution;
             uv.x += sin(phase) * .055 * sin(uv.y * 3.14159);
             uv.y += cos(phase) * .035 * sin(uv.x * 3.14159);
-            float3 top = row(uv.x, float3(1.,.97,.82), float3(1.,.944,.78), float3(1.,.89,.81));
-            float3 middle = row(uv.x, float3(1.,.70,.42), float3(1.,.54,.30), float3(.80,.68,.93));
-            float3 bottom = row(uv.x, float3(.96,.42,.35), float3(.99,.62,.46), float3(.86,.75,.95));
+            float3 top = row(uv.x, float3(1.,.969,.941), float3(.898,.627,.710), float3(.827,.561,.643));
+            float3 middle = row(uv.x, float3(.827,.561,.643), float3(.502,.063,.184), float3(.898,.627,.710));
+            float3 bottom = row(uv.x, float3(.502,.063,.184), float3(.725,.294,.439), float3(.827,.561,.643));
             float3 color = uv.y < .5 ? mix(top,middle,smoothstep(0.,.5,uv.y)) : mix(middle,bottom,smoothstep(.5,1.,uv.y));
             float2 glow = (uv - float2(.28,.21)) / float2(.27,.12);
             color = mix(color,float3(1.,1.,1.), .25 * exp(-dot(glow,glow)*1.5));

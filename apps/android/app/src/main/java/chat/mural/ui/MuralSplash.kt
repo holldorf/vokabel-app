@@ -65,7 +65,7 @@ fun MuralStartup(
     }
 }
 
-/** Uses the conversation orb directly, so startup cannot drift into a second Mural identity. */
+/** Startup uses the same approved Holldorf mark as the app header and launcher. */
 @Composable
 fun MuralSplash(modifier: Modifier = Modifier, phaseOverride: Float? = null) {
     val appName = stringResource(R.string.app_name)
@@ -81,7 +81,7 @@ fun MuralSplash(modifier: Modifier = Modifier, phaseOverride: Float? = null) {
     ) {
         val side = minOf(208.dp, maxWidth * .58f, maxHeight * .58f)
         Box(Modifier.size(side).graphicsLayer { scaleX = pulse; scaleY = pulse }) {
-            MuralOrb(modifier = Modifier.fillMaxSize().testTag("mural-splash-orb"))
+            BrandMark(modifier = Modifier.fillMaxSize().testTag("mural-splash-logo"))
         }
     }
 }

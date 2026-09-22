@@ -53,8 +53,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         MandarinPinyin.reader = IcuHanReader()
         enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT),
-            navigationBarStyle = SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT),
+            statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
+            navigationBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
         )
         purchases.bindAccountState(account.state, account.transitionBusy)
         lifecycleScope.launch {

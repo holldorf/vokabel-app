@@ -91,9 +91,9 @@ internal fun SettingsMeaningSwitch(checked: Boolean, onChange: () -> Unit) {
         .padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
         Text(stringResource(R.string.settings_meaning_subtitles), Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
         Switch(checked, onCheckedChange = null, colors = SwitchDefaults.colors(
-            checkedThumbColor = Color.White, checkedTrackColor = MuralColors.Secondary,
-            uncheckedThumbColor = Color.White, uncheckedTrackColor = MuralColors.Secondary.copy(alpha = .18f),
-            uncheckedBorderColor = Color.Transparent))
+            checkedThumbColor = MuralColors.Cream, checkedTrackColor = MuralColors.Accent,
+            uncheckedThumbColor = MuralColors.Secondary, uncheckedTrackColor = MuralColors.Surface,
+            uncheckedBorderColor = MuralColors.Border))
     }
 }
 

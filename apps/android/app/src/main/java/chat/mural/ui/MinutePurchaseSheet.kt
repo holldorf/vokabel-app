@@ -10,7 +10,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -78,7 +77,7 @@ fun MinutePurchaseSheet(
                         state.packs.forEach { pack ->
                             MinutePackCard(pack, enabled = canChoose, onBuy = { onBuy(pack.sku) })
                         }
-                        if (state.packs.isEmpty()) Surface(color = Color.White.copy(alpha = .72f), shape = RoundedCornerShape(26.dp)) {
+                        if (state.packs.isEmpty()) Surface(color = MuralColors.Surface, shape = RoundedCornerShape(26.dp)) {
                             Text(stringResource(if (checking) R.string.minute_purchases_loading else R.string.minute_purchases_unavailable),
                                 Modifier.fillMaxWidth().padding(24.dp).testTag("minute-purchase-empty"),
                                 style = MaterialTheme.typography.bodyMedium, color = MuralColors.Secondary, textAlign = TextAlign.Center)
@@ -128,8 +127,8 @@ private fun MinutePackCard(pack: MinutePack, enabled: Boolean, onBuy: () -> Unit
         ?: pluralStringResource(R.plurals.minute_purchases_pack_minutes, pack.minutes, NumberFormat.getIntegerInstance().format(pack.minutes))
     val action = stringResource(R.string.minute_purchases_pack_action, minutes, pack.formattedPrice)
     Surface(onClick = onBuy, enabled = enabled, shape = RoundedCornerShape(26.dp),
-        color = Color.White.copy(alpha = if (enabled) .88f else .60f),
-        border = BorderStroke(1.dp, Color.White), modifier = Modifier.fillMaxWidth().testTag("minute-purchase-pack-${pack.sku}")
+        color = if (enabled) MuralColors.Surface else MuralColors.CreamRaised,
+        border = BorderStroke(1.dp, MuralColors.Border), modifier = Modifier.fillMaxWidth().testTag("minute-purchase-pack-${pack.sku}")
             .semantics { contentDescription = action }) {
         // A vertical card preserves full localized prices and long text at larger font sizes.
         Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {

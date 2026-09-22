@@ -83,7 +83,7 @@ fun ReportConversationSheet(
                     if (!credential && excerpt.isNotBlank() && !validReportExcerpt(excerpt)) Text(copy.invalidText,
                         color = MuralColors.Red, style = MaterialTheme.typography.bodyMedium)
                     Text(copy.reason, style = MaterialTheme.typography.titleSmall)
-                    Surface(color = androidx.compose.ui.graphics.Color.White.copy(alpha = .8f), shape = RoundedCornerShape(24.dp)) {
+                    Surface(color = MuralColors.Surface, shape = RoundedCornerShape(24.dp)) {
                         Column(Modifier.fillMaxWidth().selectableGroup().padding(vertical = 6.dp)) {
                             ReportReason.entries.forEach { reason ->
                                 Row(Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("report-reason-${reason.wireValue}")

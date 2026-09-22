@@ -47,28 +47,28 @@ class MuralSplashTest {
         compose.onNodeWithTag("mural-splash").assertDoesNotExist()
     }
 
-    @Test fun splashContainsOnlyTheOrbAndItsPulseChangesTheRenderedFrame() {
+    @Test fun splashContainsOnlyTheLogoAndItsPulseChangesTheRenderedFrame() {
         val phase = mutableStateOf(0f)
         compose.setContent { MuralTheme { MuralSplash(phaseOverride = phase.value) } }
         compose.onNodeWithTag("mural-splash").assertIsDisplayed()
         compose.onAllNodes(SemanticsMatcher.keyIsDefined(SemanticsProperties.Text)).assertCountEquals(0)
         compose.onAllNodes(hasClickAction()).assertCountEquals(0)
-        val resting = capture("splash-orb-rest.png")
+        val resting = capture("splash-logo-rest.png")
         compose.runOnIdle { phase.value = .62831855f }
-        val expanded = capture("splash-orb-pulse.png")
-        assertFalse("The pulse must visibly change the orb", resting.sameAs(expanded))
+        val expanded = capture("splash-logo-pulse.png")
+        assertFalse("The pulse must visibly change the logo", resting.sameAs(expanded))
     }
 
-    @Test fun compactWindowKeepsTheOrbCenteredAndInsideTheSplash() {
+    @Test fun compactWindowKeepsTheLogoCenteredAndInsideTheSplash() {
         compose.setContent { MuralTheme {
             Box(Modifier.size(320.dp, 180.dp)) { MuralSplash(phaseOverride = 0f) }
         } }
         val splash = compose.onNodeWithTag("mural-splash").fetchSemanticsNode().boundsInRoot
-        val orb = compose.onNodeWithTag("mural-splash-orb", useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
-        assertTrue(orb.left > splash.left && orb.right < splash.right)
-        assertTrue(orb.top > splash.top && orb.bottom < splash.bottom)
-        assertEquals(splash.center.x, orb.center.x, 1f)
-        assertEquals(splash.center.y, orb.center.y, 1f)
+        val logo = compose.onNodeWithTag("mural-splash-logo", useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
+        assertTrue(logo.left > splash.left && logo.right < splash.right)
+        assertTrue(logo.top > splash.top && logo.bottom < splash.bottom)
+        assertEquals(splash.center.x, logo.center.x, 1f)
+        assertEquals(splash.center.y, logo.center.y, 1f)
     }
 
     private fun capture(name: String): Bitmap {

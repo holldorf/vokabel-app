@@ -21,7 +21,7 @@ fun inlineMarkdown(text: String): AnnotatedString = buildAnnotatedString {
         when {
             bold.isNotEmpty() -> withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(bold) }
             safeUrl == null -> append(label)
-            else -> withLink(LinkAnnotation.Url(safeUrl, TextLinkStyles(SpanStyle(color = MuralColors.Orange)))) { append(label) }
+            else -> withLink(LinkAnnotation.Url(safeUrl, TextLinkStyles(SpanStyle(color = MuralColors.Accent)))) { append(label) }
         }
         cursor = match.range.last + 1
     }
