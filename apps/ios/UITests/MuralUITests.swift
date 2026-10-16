@@ -137,12 +137,17 @@ final class MuralUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = ["--preview", "--preview-onboarding"]
         app.launch()
-        XCTAssertTrue(app.buttons["onboarding-language-de"].waitForExistence(timeout: 10))
-        for id in ["nb", "es", "en", "fr", "it", "pt", "zh"] {
-            XCTAssertFalse(app.buttons["onboarding-language-\(id)"].exists, id)
-        }
+        let picker = app.buttons["onboarding-language-picker"]
+        XCTAssertTrue(picker.waitForExistence(timeout: 10))
+        XCTAssertTrue(picker.label.contains("German · Germany"))
         XCTAssertTrue(app.staticTexts["Deutsch mit Dr. Holldorf"].exists)
         XCTAssertTrue(app.staticTexts["Für deinen Alltag in der Pflege."].exists)
+        reveal(picker, in: app)
+        picker.tap()
+        XCTAssertTrue(app.buttons["onboarding-language-de"].waitForExistence(timeout: 5))
+        for id in ["nb", "es", "en", "fr", "it", "pt", "zh", "sr", "el", "tl", "nl", "ru"] {
+            XCTAssertFalse(app.buttons["onboarding-language-\(id)"].exists, id)
+        }
     }
 
     func testGermanSelectionAtLargestAccessibilityTextSize() {
