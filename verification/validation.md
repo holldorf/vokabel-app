@@ -182,7 +182,7 @@ The device results verify the application/provider paths with synthetic typed in
 
 18 September 2026
 
-This fork ([holldorf/mural](https://github.com/holldorf/mural)) restricts the selectable learning language to German, adds thirteen shared `Care work` themes with German overrides, widens the subtitle languages to common care-worker origin languages, and turns the German teaching prompts towards ward vocabulary and role-play. `LanguageRegistry.all` and `defaultID` are unchanged so old archives in any of the eight languages still import and open.
+This repository ([holldorf/vokabel-app](https://github.com/holldorf/vokabel-app)) restricts the selectable learning language to German, adds thirteen shared `Care work` themes with German overrides, widens the subtitle languages to common care-worker origin languages, and turns the German teaching prompts towards ward vocabulary and role-play. `LanguageRegistry.all` and `defaultID` are unchanged so old archives in any of the eight languages still import and open.
 
 - **57 script tests passed** (`python3 -m unittest discover -s scripts/tests -t .`), including four new export tests for `selectable`, `preferredID` and the error paths.
 - `scripts/export_android_content.py` regenerated `Languages.kt`; `--check` reports no drift. `scripts/check_cross_platform.py` passed, so the changed German `introduction` prompt is identical on iOS and Android.

@@ -47,9 +47,9 @@ class DesignReviewTest {
     }
     @Test fun dropdownOnboardingAndCoreScreensKeepTheFloatingNavigationAndPrimaryActionVisible() {
         compose.onNodeWithTag("onboarding-language-picker").assertIsDisplayed()
-        compose.onNodeWithText("Deutsch mit Dr. Holldorf").assertIsDisplayed()
+        compose.onNodeWithText("Vokabel App").assertIsDisplayed()
         compose.onNodeWithText("Für deinen Alltag in der Pflege.").assertIsDisplayed()
-        assertEquals("Deutsch mit Dr. Holldorf", compose.activity.applicationInfo.loadLabel(compose.activity.packageManager).toString())
+        assertEquals("Vokabel App", compose.activity.applicationInfo.loadLabel(compose.activity.packageManager).toString())
         capture("01-onboarding")
         compose.onNodeWithTag("onboarding-language-picker").performClick()
         compose.onNodeWithTag("onboarding-language-es").assertDoesNotExist()

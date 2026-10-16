@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Product identity stays the same in every UI language. -->
-    <string name="app_name" translatable="false">Deutsch mit Dr. Holldorf</string>
-    <string name="app_wordmark" translatable="false">Deutsch mit\nDr. Holldorf</string>
+    <string name="app_name" translatable="false">Vokabel App</string>
+    <string name="app_wordmark" translatable="false">Vokabel App</string>
     <string name="app_tagline" translatable="false">Für deinen Alltag in der Pflege.</string>
     <!-- Common -->
     <string name="common_ok">OK</string>
@@ -183,7 +183,7 @@
     <string name="settings_openai_data_controls">AI Data Controls</string>
     <string name="settings_open_source_notices">Open-source notices</string>
     <string name="settings_data_use_footer">Audio and selected text go to OpenAI while you practise. Requests disable provider storage where supported; abuse-monitoring retention may still apply. Raw audio is not saved by Mural.</string>
-    <string name="settings_app_version_footer">Deutsch mit Dr. Holldorf %1$s · Android\nFür deinen Alltag in der Pflege.</string>
+    <string name="settings_app_version_footer">Vokabel App %1$s · Android\nFür deinen Alltag in der Pflege.</string>
     <string name="settings_open_api_keys">Manage API keys</string>
     <string name="settings_delete_key_confirm_title">Delete the saved key?</string>
     <string name="settings_delete_key_confirm_message">You\'ll need another key to use AI features again.</string>

@@ -179,7 +179,7 @@
     <string name="settings_openai_data_controls">Controles de datos de IA</string>
     <string name="settings_open_source_notices">Avisos de código abierto</string>
     <string name="settings_data_use_footer">El audio y el texto elegido se envían a OpenAI durante la práctica. Mural no guarda audio sin procesar.</string>
-    <string name="settings_app_version_footer">Deutsch mit Dr. Holldorf %1$s · Android\nFür deinen Alltag in der Pflege.</string>
+    <string name="settings_app_version_footer">Vokabel App %1$s · Android\nFür deinen Alltag in der Pflege.</string>
     <string name="settings_open_api_keys">Administrar claves de API</string>
     <string name="settings_delete_key_confirm_title">¿Eliminar la clave guardada?</string>
     <string name="settings_delete_key_confirm_message">Necesitarás otra clave para volver a usar las funciones de IA.</string>

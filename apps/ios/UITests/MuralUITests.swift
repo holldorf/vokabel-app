@@ -140,7 +140,7 @@ final class MuralUITests: XCTestCase {
         let picker = app.buttons["onboarding-language-picker"]
         XCTAssertTrue(picker.waitForExistence(timeout: 10))
         XCTAssertTrue(picker.label.contains("German · Germany"))
-        XCTAssertTrue(app.staticTexts["Deutsch mit Dr. Holldorf"].exists)
+        XCTAssertTrue(app.staticTexts["Vokabel App"].exists)
         XCTAssertTrue(app.staticTexts["Für deinen Alltag in der Pflege."].exists)
         reveal(picker, in: app)
         picker.tap()
@@ -731,10 +731,10 @@ final class MuralUITests: XCTestCase {
         let app = launch()
         app.buttons["Settings"].tap()
         for _ in 0..<6 {
-            if app.buttons["About Deutsch mit Dr. Holldorf"].isHittable { break }
+            if app.buttons["About Vokabel App"].isHittable { break }
             app.swipeUp()
         }
-        app.buttons["About Deutsch mit Dr. Holldorf"].tap()
+        app.buttons["About Vokabel App"].tap()
         for _ in 0..<6 {
             if app.buttons["Open-source notices"].isHittable { break }
             app.swipeUp()

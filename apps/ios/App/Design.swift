@@ -19,7 +19,7 @@ enum MuralColor {
 }
 
 enum AppBrand {
-    static let name = "Deutsch mit Dr. Holldorf"
+    static let name = "Vokabel App"
     static let tagline = "Für deinen Alltag in der Pflege."
 }
 
@@ -32,7 +32,7 @@ struct Brand: View {
                 .frame(width: 36, height: 36)
                 .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                 .accessibilityHidden(true)
-            Text("Deutsch mit\nDr. Holldorf").font(.system(.headline, design: .rounded, weight: .bold))
+            Text(AppBrand.name).font(.system(.headline, design: .rounded, weight: .bold))
                 .fixedSize(horizontal: false, vertical: true)
         }.foregroundStyle(MuralColor.ink).accessibilityElement(children: .ignore).accessibilityLabel(AppBrand.name)
     }

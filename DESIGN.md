@@ -1,4 +1,4 @@
-# Dr. Holldorf native app identity
+# Vokabel App native identity
 
 ## Approved direction
 
