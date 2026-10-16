@@ -1,5 +1,6 @@
 import Foundation
 import MuralCore
+import UIKit
 
 final class NoRedirect: NSObject, URLSessionTaskDelegate {
     func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) { completionHandler(nil) }
@@ -9,7 +10,38 @@ struct APIUsage { var input = 0; var output = 0; var searches = 0 }
 struct APIResult { var text: String; var sources: [SourceLink]; var usage: APIUsage }
 
 @MainActor final class APIClient {
+    var conversationProvider: ConversationProvider = .personalKey
+    var hostedLease: HostedLease?
+    var canProcessAI: () -> Bool = { true }
+    private var responseTasks: [UUID: Task<APIResult, Error>] = [:]
+    func cancelAIRequests() {
+        responseTasks.values.forEach { $0.cancel() }
+        responseTasks.removeAll()
+    }
     private let session: URLSession
+    private var voiceCredential = VoiceCredentialScope()
+    private var credentialExpiry: Task<Void, Never>?
+    func beginVoiceCredential() {
+        credentialExpiry?.cancel(); voiceCredential.clear()
+        guard let key = CredentialStore.read() else { return }
+        voiceCredential.begin(key: key)
+        expireVoiceCredential(after: .seconds(65 * 60))
+    }
+    func endVoiceCredential() {
+        voiceCredential.end()
+        expireVoiceCredential(after: .seconds(60))
+    }
+    private func expireVoiceCredential(after duration: Duration) {
+        credentialExpiry?.cancel()
+        credentialExpiry = Task { [weak self] in
+            do { try await Task.sleep(for: duration) } catch { return }
+            self?.voiceCredential.clear(); self?.credentialExpiry = nil
+        }
+    }
+    private func personalKey() -> String? {
+        voiceCredential.credential(protectedDataAvailable: UIApplication.shared.isProtectedDataAvailable,
+                                   readStored: CredentialStore.read)
+    }
     init() {
         let config = URLSessionConfiguration.ephemeral
         config.timeoutIntervalForRequest = 45; config.timeoutIntervalForResource = 60
@@ -17,7 +49,8 @@ struct APIResult { var text: String; var sources: [SourceLink]; var usage: APIUs
         session = URLSession(configuration: config, delegate: NoRedirect(), delegateQueue: nil)
     }
     func post(_ path: String, body: [String: Any]) async throws -> [String: Any] {
-        guard let key = CredentialStore.read() else { throw APIError.missingKey }
+        guard canProcessAI() else { throw AIProcessingConsent.ConsentError.required }
+        guard let key = personalKey() else { throw APIError.missingKey }
         var request = URLRequest(url: URL(string: "https://api.openai.com/v1/" + path)!)
         request.httpMethod = "POST"; request.setValue("Bearer " + key, forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -29,8 +62,34 @@ struct APIResult { var text: String; var sources: [SourceLink]; var usage: APIUs
         guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else { throw APIError.invalidResponse }
         return json
     }
-    func respond(instructions: String, input: String, schema: [String: Any]? = nil, search: Bool = false, onText: (@MainActor (String) -> Void)? = nil) async throws -> APIResult {
-        var body: [String: Any] = ["model": "gpt-5.6-luna", "store": false, "instructions": instructions,
+    func respond(instructions: String, input: String, schema: [String: Any]? = nil, search: Bool = false,
+                 purpose: String = "meaning", onText: (@MainActor (String) -> Void)? = nil) async throws -> APIResult {
+        guard canProcessAI() else { throw AIProcessingConsent.ConsentError.required }
+        try Task.checkCancellation()
+        let id = UUID()
+        let task = Task { @MainActor in
+            try Task.checkCancellation()
+            guard self.canProcessAI() else { throw AIProcessingConsent.ConsentError.required }
+            let result = try await self.performResponse(instructions: instructions, input: input, schema: schema,
+                                                       search: search, purpose: purpose, onText: onText)
+            try Task.checkCancellation()
+            guard self.canProcessAI() else { throw AIProcessingConsent.ConsentError.required }
+            return result
+        }
+        responseTasks[id] = task
+        defer { responseTasks.removeValue(forKey: id) }
+        return try await withTaskCancellationHandler(operation: { try await task.value }, onCancel: { task.cancel() })
+    }
+    private func performResponse(instructions: String, input: String, schema: [String: Any]?, search: Bool,
+                                 purpose: String, onText: (@MainActor (String) -> Void)?) async throws -> APIResult {
+        if conversationProvider == .hosted {
+            guard let hostedLease, let client = HostedClient.shared else { throw HostedError.unavailable }
+            let result = try await client.helper(hostedLease, purpose: purpose, instructions: instructions, input: input,
+                                                 schema: schema, search: search)
+            onText?(result.text)
+            return result
+        }
+        var body: [String: Any] = ["model": "gpt-6-luna", "store": false, "instructions": instructions,
                                   "input": [["role": "user", "content": input]], "max_output_tokens": schema == nil ? 1400 : 2200,
                                   "reasoning": ["effort": "low"]]
         if let schema { body["text"] = ["format": ["type": "json_schema", "name": "mural_result", "strict": true, "schema": schema]] }
@@ -59,7 +118,8 @@ struct APIResult { var text: String; var sources: [SourceLink]; var usage: APIUs
         return APIResult(text: text, sources: sources, usage: usage)
     }
     private func streamResponse(body: [String: Any], onText: @MainActor (String) -> Void) async throws -> [String: Any] {
-        guard let key = CredentialStore.read() else { throw APIError.missingKey }
+        guard canProcessAI() else { throw AIProcessingConsent.ConsentError.required }
+        guard let key = personalKey() else { throw APIError.missingKey }
         var request = URLRequest(url: URL(string: "https://api.openai.com/v1/responses")!)
         request.httpMethod = "POST"
         request.setValue("Bearer " + key, forHTTPHeaderField: "Authorization")

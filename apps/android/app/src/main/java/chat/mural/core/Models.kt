@@ -174,8 +174,11 @@ object ArchiveCodec {
             requireFields(migrated)
             json.decodeFromJsonElement<Archive>(migrated)
         } catch (e: ArchiveError) { throw e } catch (_: Exception) { throw ArchiveError.INVALID }
+        // Earlier care-work builds stored these subtitle names; upstream later renamed them.
+        LEGACY_MEANING_LANGUAGES[a.preferences.meaningLanguage]?.let { a.preferences = a.preferences.copy(meaningLanguage = it) }
         validate(a); return a
     }
+    private val LEGACY_MEANING_LANGUAGES = mapOf("Filipino" to "Tagalog (Filipino)", "Serbian" to "Serbian (Latin)")
     fun merge(current: Archive, incoming: Archive): Archive {
         validate(incoming)
         val known = current.sessions.map { it.id.lowercase() }.toSet()

@@ -9,6 +9,7 @@ struct OnboardingView: View {
     @State private var meaningLanguage: String
     @State private var hasChosenMeaning: Bool
     @State private var greetingIndex = 0
+    @State private var adultConfirmed = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.scenePhase) private var scenePhase
@@ -67,10 +68,15 @@ struct OnboardingView: View {
         .safeAreaInset(edge: .bottom, spacing: 0) {
             VStack(spacing: 12) {
                 if step == 1 && !typeSize.isAccessibilitySize { consentDetails }
-                Button(step == 0 ? "Continue" : "Agree and continue") { advance() }
-                    .font(.system(.headline, design: .rounded)).multilineTextAlignment(.center)
-                    .frame(maxWidth: .infinity).padding(.vertical, 19)
-                    .background(MuralColor.orange, in: Capsule())
+                Button { advance() } label: {
+                    Text(step == 0 ? "Continue" : "Agree and continue")
+                        .font(.system(.headline, design: .rounded)).multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity).padding(.vertical, 19)
+                        .background(MuralColor.orange, in: Capsule())
+                        .contentShape(Capsule())
+                }
+                    .buttonStyle(.plain)
+                    .disabled(step == 1 && !adultConfirmed)
                     .accessibilityIdentifier("onboarding-continue")
                 if !typeSize.isAccessibilitySize {
                     Text(step == 0 ? "We’ll find your pace through conversation." : "You can change both languages in Settings.")
@@ -97,6 +103,8 @@ struct OnboardingView: View {
 
     private var consentDetails: some View {
         VStack(spacing: 12) {
+            Toggle("I’m 18 or older", isOn: $adultConfirmed)
+                .font(.footnote).accessibilityIdentifier("onboarding-adult-confirmation")
             Text(AIProcessingConsent.summary)
                 .font(.footnote).foregroundStyle(MuralColor.secondary).multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
@@ -114,26 +122,31 @@ struct OnboardingView: View {
                 Text(AppBrand.tagline)
                     .font(.subheadline).foregroundStyle(MuralColor.secondary)
             }.multilineTextAlignment(.center).accessibilityIdentifier("onboarding-language-title")
-            VStack(spacing: 10) {
+            Menu {
                 ForEach(LanguageRegistry.selectable) { language in
                     Button { targetID = language.id } label: {
-                        HStack(spacing: 14) {
-                            VStack(alignment: .leading, spacing: 3) {
-                                Text(language.nativeName).font(.system(.headline, design: .rounded))
-                                Text(language.settingsTitle).font(.caption).foregroundStyle(MuralColor.secondary)
-                            }
-                            Spacer()
-                            Image(systemName: targetID == language.id ? "checkmark.circle.fill" : "circle")
-                                .font(.title3).foregroundStyle(targetID == language.id ? MuralColor.accent : MuralColor.secondary)
-                        }.padding(.horizontal, 18).padding(.vertical, 13).frame(maxWidth: .infinity)
-                            .background(targetID == language.id ? MuralColor.peach : MuralColor.surface, in: RoundedRectangle(cornerRadius: 22))
-                            .overlay { RoundedRectangle(cornerRadius: 22).strokeBorder(targetID == language.id ? MuralColor.accent : MuralColor.border, lineWidth: 1.5) }
-                    }.buttonStyle(.plain)
-                        .accessibilityLabel(language.settingsTitle)
-                        .accessibilityAddTraits(targetID == language.id ? .isSelected : [])
-                        .accessibilityIdentifier("onboarding-language-\(language.id)")
+                        if targetID == language.id {
+                            Label(language.settingsTitle, systemImage: "checkmark")
+                        } else {
+                            Text(language.settingsTitle)
+                        }
+                    }.accessibilityIdentifier("onboarding-language-\(language.id)")
                 }
+            } label: {
+                HStack(spacing: 14) {
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(target.nativeName).font(.system(.title3, design: .rounded, weight: .medium))
+                        Text(target.settingsTitle).font(.caption).foregroundStyle(MuralColor.secondary)
+                    }
+                    Spacer()
+                    Image(systemName: "chevron.down").font(.system(.subheadline, weight: .semibold))
+                        .foregroundStyle(MuralColor.secondary)
+                }.padding(.horizontal, 22).padding(.vertical, 18).frame(maxWidth: .infinity)
+                    .background(MuralColor.surface, in: RoundedRectangle(cornerRadius: 24))
+                    .overlay { RoundedRectangle(cornerRadius: 24).strokeBorder(MuralColor.border, lineWidth: 1) }
             }
+            .accessibilityLabel("Learning language, \(target.settingsTitle)")
+            .accessibilityIdentifier("onboarding-language-picker")
         }
     }
 
@@ -169,6 +182,8 @@ struct OnboardingView: View {
                 let preferredNames = Locale.preferredLanguages.map { identifier in
                     let code = Locale(identifier: identifier).language.languageCode?.identifier ?? identifier
                     if code == "zh" { return "Chinese (Simplified)" }
+                    if code == "sr" { return "Serbian (Latin)" }
+                    if code == "fil" { return "Tagalog (Filipino)" }
                     return LanguageRegistry.module(for: code)?.name ?? Locale(identifier: "en").localizedString(forLanguageCode: code)?.capitalized ?? ""
                 }
                 meaningLanguage = preferredNames.first { MeaningLanguages.all.contains($0) && $0 != target.name }
@@ -190,7 +205,7 @@ struct OnboardingView: View {
 
 enum AIProcessingConsent {
     static let version = 1
-    static let summary = "With your permission, Mural sends audio and selected text to OpenAI to provide conversations and meanings. Provider retention rules apply."
+    static let summary = "With your permission, Mural sends audio and selected text to OpenAI for conversations and meanings. Mural minutes pass through our server; your own key connects directly. Provider retention rules apply. You can withdraw permission in Settings → AI processing."
     enum ConsentError: LocalizedError {
         case required
         var errorDescription: String? { "Before using AI features, open Talk and tap the microphone to review how OpenAI processes your audio and text." }
@@ -201,6 +216,7 @@ struct AIConsentView: View {
     let agree: () -> Void
     let decline: () -> Void
     var body: some View {
+        ScrollView {
         VStack(alignment: .leading, spacing: 22) {
             Image(systemName: "waveform.bubble").font(.system(size: 32, weight: .light)).foregroundStyle(MuralColor.orange)
             Text("Before we talk.").font(.system(.title, design: .rounded, weight: .semibold))
@@ -211,11 +227,52 @@ struct AIConsentView: View {
             Link("Privacy policy", destination: URL(string: "https://mural.chat/privacy/")!).font(.subheadline).underline()
             Button("Agree and continue", action: agree).font(.headline).frame(maxWidth: .infinity).padding(18)
                 .background(MuralColor.orange, in: Capsule()).accessibilityIdentifier("ai-consent-agree")
-            Button("Not now", action: decline).font(.subheadline).frame(maxWidth: .infinity)
+            Button("Not now", action: decline).font(.subheadline).frame(maxWidth: .infinity, minHeight: 44)
                 .accessibilityIdentifier("ai-consent-decline")
         }.padding(28).foregroundStyle(MuralColor.ink).tint(MuralColor.ink)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading).background(MuralColor.cream)
+        }.background(MuralColor.cream)
             .presentationDetents([.large]).interactiveDismissDisabled()
+    }
+}
+
+struct AIProcessingSettingsView: View {
+    let coordinator: ConversationCoordinator
+    @Environment(\.dismiss) private var dismiss
+    @State private var confirmingWithdrawal = false
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 22) {
+                    Text("AI processing").font(.system(.title, design: .rounded, weight: .semibold))
+                    Text(AIProcessingConsent.summary)
+                    Text(coordinator.hasAIConsent
+                         ? "You’ve allowed this processing. You can withdraw permission at any time. This ends any active conversation and stops new AI requests."
+                         : "AI processing is off. Your saved words and conversations remain available on this iPhone.")
+                        .foregroundStyle(MuralColor.secondary)
+                        .accessibilityIdentifier("ai-processing-status")
+                    Link("Privacy policy", destination: URL(string: "https://mural.chat/privacy/")!).underline()
+                    if coordinator.hasAIConsent {
+                        Button("Withdraw permission") { confirmingWithdrawal = true }
+                            .frame(maxWidth: .infinity, minHeight: 44)
+                            .accessibilityIdentifier("ai-processing-withdraw")
+                    } else {
+                        Button("Agree and enable AI") { coordinator.acceptAIConsent() }
+                            .font(.headline).frame(maxWidth: .infinity).padding(18)
+                            .background(MuralColor.orange, in: Capsule())
+                            .accessibilityIdentifier("ai-processing-enable")
+                    }
+                }.padding(28).frame(maxWidth: .infinity, alignment: .leading)
+            }.background(MuralColor.cream).foregroundStyle(MuralColor.ink).tint(MuralColor.ink)
+                .navigationTitle("Privacy").navigationBarTitleDisplayMode(.inline)
+                .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() }.accessibilityIdentifier("ai-processing-done") } }
+        }.presentationDetents([.large])
+            .confirmationDialog("Withdraw AI processing permission?", isPresented: $confirmingWithdrawal, titleVisibility: .visible) {
+                Button("Withdraw permission", role: .destructive) { coordinator.withdrawAIConsent() }
+                    .accessibilityIdentifier("ai-processing-confirm-withdraw")
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("Any active conversation will end. Your saved learning history stays on this iPhone. This does not undo processing already completed by OpenAI.")
+            }
     }
 }
 

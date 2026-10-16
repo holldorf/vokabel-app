@@ -216,10 +216,13 @@ public struct Archive: Codable, Sendable {
     public static func decode(_ data: Data) throws -> Archive {
         guard data.count <= maximumEncodedBytes else { throw ArchiveError.tooLarge }
         let migrated = try migrate(data)
-        let archive = try JSONDecoder().decode(Archive.self, from: migrated)
+        var archive = try JSONDecoder().decode(Archive.self, from: migrated)
+        // Earlier care-work builds stored these subtitle names; upstream later renamed them.
+        archive.preferences.meaningLanguage = legacyMeaningLanguages[archive.preferences.meaningLanguage] ?? archive.preferences.meaningLanguage
         try archive.validate()
         return archive
     }
+    static let legacyMeaningLanguages = ["Filipino": "Tagalog (Filipino)", "Serbian": "Serbian (Latin)"]
     /// Bound the selected file before loading it. The read limit also covers growth after the size check.
     public static func readImportData(from url: URL) throws -> Data {
         guard url.isFileURL, try url.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile == true
@@ -311,4 +314,12 @@ public enum ArchiveError: Error, LocalizedError {
         case .invalid: "This backup has invalid or duplicate records."
         }
     }
+}
+
+public enum MinuteBalanceTime {
+    public static func roundedSeconds(_ milliseconds: Int) -> Int {
+        let value = max(0, milliseconds)
+        return value / 1_000 + (value % 1_000 == 0 ? 0 : 1)
+    }
+    public static func isEligible(_ milliseconds: Int) -> Bool { milliseconds > 0 }
 }
