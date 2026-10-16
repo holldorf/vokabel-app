@@ -205,7 +205,7 @@ struct OnboardingView: View {
 
 enum AIProcessingConsent {
     static let version = 1
-    static let summary = "With your permission, Mural sends audio and selected text to OpenAI for conversations and meanings. Mural minutes pass through our server; your own key connects directly. Provider retention rules apply. You can withdraw permission in Settings → AI processing."
+    static let summary = "With your permission, Vani sends audio and selected text to OpenAI for conversations and meanings. Vani minutes pass through our server; your own key connects directly. Provider retention rules apply. You can withdraw permission in Settings → AI processing."
     enum ConsentError: LocalizedError {
         case required
         var errorDescription: String? { "Before using AI features, open Talk and tap the microphone to review how OpenAI processes your audio and text." }
@@ -222,7 +222,7 @@ struct AIConsentView: View {
             Text("Before we talk.").font(.system(.title, design: .rounded, weight: .semibold))
                 .accessibilityIdentifier("ai-consent-title")
             Text(AIProcessingConsent.summary).font(.body)
-            Text("Your learning record is stored on this iPhone. Mural does not save raw audio. You can keep browsing your saved words and conversations without agreeing.")
+            Text("Your learning record is stored on this iPhone. Vani does not save raw audio. You can keep browsing your saved words and conversations without agreeing.")
                 .font(.subheadline).foregroundStyle(MuralColor.secondary)
             Link("Privacy policy", destination: URL(string: "https://mural.chat/privacy/")!).font(.subheadline).underline()
             Button("Agree and continue", action: agree).font(.headline).frame(maxWidth: .infinity).padding(18)

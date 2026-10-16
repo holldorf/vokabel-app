@@ -74,7 +74,7 @@ import UIKit
                 UIApplication.shared.endBackgroundTask(backgroundTask); backgroundTask = .invalid
             }
         }
-        backgroundTask = UIApplication.shared.beginBackgroundTask(withName: "Settle Mural conversation") {
+        backgroundTask = UIApplication.shared.beginBackgroundTask(withName: "Settle Vani conversation") {
             Task { @MainActor in releaseBackgroundTask() }
         }
         Task { [weak self] in

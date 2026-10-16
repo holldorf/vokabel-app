@@ -49,7 +49,7 @@ class VoiceConversationService : Service() {
             ServiceCompat.startForeground(this, NOTIFICATION, notification, types)
             wakeLock?.let { if (it.isHeld) it.release() }
             wakeLock = getSystemService(PowerManager::class.java)
-                .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Mural:voice").apply {
+                .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Vani:voice").apply {
                     // The app's maximum session is 60 minutes. This is a final bound, not its timer.
                     acquire(65 * 60 * 1000L)
                 }

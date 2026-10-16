@@ -19,7 +19,7 @@ enum MuralColor {
 }
 
 enum AppBrand {
-    static let name = "Vokabel App"
+    static let name = "Vani"
     static let tagline = "Für deinen Alltag in der Pflege."
 }
 

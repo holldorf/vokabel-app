@@ -214,7 +214,7 @@ class CaptionParityTest {
         compose.onNodeWithTag("target-caption").assertTextEquals("Hei!")
         compose.onNodeWithTag("meaning-caption").assertTextEquals("Hi!")
         compose.onNodeWithTag("talk-guest-minutes").assertDoesNotExist()
-        compose.onNodeWithText("8 min 54 sec of Mural minutes remaining").assertDoesNotExist()
+        compose.onNodeWithText("8 min 54 sec of Vani minutes remaining").assertDoesNotExist()
         compose.onNodeWithText("Microphone off").assertDoesNotExist()
         compose.onNodeWithText("Reply in whichever language comes to you.").assertDoesNotExist()
         compose.onNodeWithTag("start-conversation").assertContentDescriptionEquals("Start conversation")
@@ -229,7 +229,7 @@ class CaptionParityTest {
         assertTrue("Meaning overlaps microphone: meaning=$meaning microphone=$microphone", meaning.bottom <= microphone.top)
         assertTrue("Orb shrank below 120 dp", orb.width / compose.density.density >= 119f)
         compose.runOnIdle { state("hostedReadiness", HostedReadiness()) }
-        compose.onNodeWithText("Couldn’t check your Mural minutes.").assertDoesNotExist()
+        compose.onNodeWithText("Couldn’t check your Vani minutes.").assertDoesNotExist()
         compose.runOnIdle {
             MuralViewModel::class.java.getDeclaredField("voiceSession").apply { isAccessible = true }.setBoolean(vm, true)
             state("state", "active")

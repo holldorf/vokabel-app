@@ -53,7 +53,7 @@ class MandarinPinyinTest {
     }
 
     @Test fun textWithoutReadingsHasNoReadingAid() {
-        assertNull(MandarinPinyin.reading("Hello, Mural 2026! ☕️", reader))
+        assertNull(MandarinPinyin.reading("Hello, Vani 2026! ☕️", reader))
         assertNull(MandarinPinyin.reading("", reader))
         assertNull(MandarinPinyin.reading("你好", null))
     }
@@ -63,7 +63,7 @@ class MandarinPinyinTest {
     }
 
     @Test fun tokensAndChineseSegmentsPreserveEveryCharacter() {
-        for (text in listOf("", "你好！", "  我想去银行，然后去旅行。\n", "你好，Mural 2026！☕️\n再见", "𠀀和咖啡", "銀行與音樂", "咖", "café e pão")) {
+        for (text in listOf("", "你好！", "  我想去银行，然后去旅行。\n", "你好，Vani 2026！☕️\n再见", "𠀀和咖啡", "銀行與音樂", "咖", "café e pão")) {
             assertEquals(text, MandarinPinyin.tokens(text, reader).joinToString("") { it.text })
             assertEquals(text, CaptionWords.segments(text, "zh", reader).joinToString("") { it.text })
         }

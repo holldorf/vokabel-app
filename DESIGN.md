@@ -1,4 +1,4 @@
-# Vokabel App native identity
+# Vani native identity
 
 ## Approved direction
 

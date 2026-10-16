@@ -5,7 +5,7 @@ import SwiftUI
     @State private var startupError: String?
     init() {
         do { _store = State(initialValue: try LearningStore(inMemory: ProcessInfo.processInfo.arguments.contains("--preview") || AudioVerification.requested)) }
-        catch { _startupError = State(initialValue: "Mural couldn’t open its learning record. Your existing data has not been replaced.") }
+        catch { _startupError = State(initialValue: "Vani couldn’t open its learning record. Your existing data has not been replaced.") }
     }
     var body: some Scene {
         WindowGroup {

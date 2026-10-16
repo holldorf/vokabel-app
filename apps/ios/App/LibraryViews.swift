@@ -355,19 +355,19 @@ struct SettingsView: View {
                         ForEach([5, 10, 15, 20, 30, 60], id: \.self) { Text("\($0) minutes").tag($0) }
                     }.pickerStyle(.menu).disabled(coordinator.isRunning)
                 } header: { Text("Conversation") } footer: {
-                    Text("Ends one conversation after the selected time. Your available Mural minutes are separate.")
+                    Text("Ends one conversation after the selected time. Your available Vani minutes are separate.")
                 }
                 Section("Your data") {
                     NavigationLink("Learning backup & data") { LearningBackupView(coordinator: coordinator) }
                 }
                 Section {
                     Picker("Conversation access", selection: Binding(get: { coordinator.conversationProvider }, set: chooseProvider)) {
-                        Text("Mural minutes").tag(ConversationProvider.hosted)
+                        Text("Vani minutes").tag(ConversationProvider.hosted)
                         Text("My API key").tag(ConversationProvider.personalKey)
                     }.pickerStyle(.menu).disabled(coordinator.isRunning)
                         .accessibilityIdentifier("settings-conversation-access")
                     if coordinator.conversationProvider == .personalKey {
-                        Text("No Mural minute limit. OpenAI bills your account for usage.")
+                        Text("No Vani minute limit. OpenAI bills your account for usage.")
                             .font(.footnote).foregroundStyle(MuralColor.secondary)
                     }
                     if hasKey || coordinator.conversationProvider == .personalKey {
@@ -440,7 +440,7 @@ struct SettingsView: View {
         .confirmationDialog("Use your API key?", isPresented: $confirmingPersonalKey, titleVisibility: .visible) {
             Button("Use my key") { coordinator.selectConversationProvider(.personalKey) }
             Button("Cancel", role: .cancel) {}
-        } message: { Text("OpenAI bills your account for usage. Mural minutes stay available if you switch back later.") }
+        } message: { Text("OpenAI bills your account for usage. Vani minutes stay available if you switch back later.") }
         .task { account.refresh() }
     }
     private func chooseProvider(_ provider: ConversationProvider) {
@@ -482,7 +482,7 @@ private struct InterestsSettingsView: View {
                 }), axis: .vertical)
                 .lineLimit(4...10).disabled(coordinator.isRunning)
                 .accessibilityIdentifier("settings-interests")
-            } footer: { Text("Helps Mural suggest conversations that matter to you. Saved as you type on this iPhone.") }
+            } footer: { Text("Helps Vani suggest conversations that matter to you. Saved as you type on this iPhone.") }
         }.scrollContentBackground(.hidden).background(MuralColor.cream).navigationTitle("Interests")
     }
 }
@@ -520,12 +520,12 @@ private struct OpenAIKeyView: View {
                     Button("Remove key", role: .destructive) { removing = true }
                         .disabled(coordinator.isRunning)
                 }
-            } footer: { Text("No Mural minute limit. OpenAI bills your account for usage. The key stays in this iPhone’s Keychain and goes only to OpenAI.") }
+            } footer: { Text("No Vani minute limit. OpenAI bills your account for usage. The key stays in this iPhone’s Keychain and goes only to OpenAI.") }
             if let failure = coordinator.personalKeyFailure {
                 Section("OpenAI issue") {
                     Text(failure.localizedDescription)
                     if coordinator.conversationProvider == .personalKey {
-                        Button("Use Mural minutes") { dismiss(); coordinator.requestHostedSwitch = true }
+                        Button("Use Vani minutes") { dismiss(); coordinator.requestHostedSwitch = true }
                     }
                 }
             }
@@ -548,11 +548,11 @@ private struct OpenAIKeyView: View {
                         hasKey = false; key = ""
                         coordinator.clearPersonalKeyFailure()
                         message = coordinator.conversationProvider == .personalKey
-                            ? "Key removed. Add a key or choose Mural minutes before talking."
+                            ? "Key removed. Add a key or choose Vani minutes before talking."
                             : "Key removed."
                     } catch { message = error.localizedDescription }
                 }
-            } message: { Text("If this key is selected for conversations, Mural will wait for a new key or your explicit choice to use Mural minutes.") }
+            } message: { Text("If this key is selected for conversations, Vani will wait for a new key or your explicit choice to use Vani minutes.") }
     }
 }
 
@@ -578,10 +578,10 @@ private struct HostedAccessSwitchView: View {
                     else { Text("Couldn’t check your minutes. Try again.") }
                     if failed { Text("Your minutes changed. Check again before switching.").foregroundStyle(MuralColor.secondary) }
                     if !checking && available == nil { Button("Try again") { Task { await check() } } }
-                } header: { Text("Mural minutes") } footer: { Text("Your saved OpenAI key will remain on this iPhone. Switching changes the next conversation only.") }
+                } header: { Text("Vani minutes") } footer: { Text("Your saved OpenAI key will remain on this iPhone. Switching changes the next conversation only.") }
                 if let available, available.canStart, !checking {
                     Section {
-                        Button("Use Mural minutes") {
+                        Button("Use Vani minutes") {
                             switchTask = Task {
                                 checking = true
                                 guard let latest = await coordinator.hostedBalanceForSwitch(), latest.canStart,
@@ -630,7 +630,7 @@ private struct LearningBackupView: View {
             } footer: { Text("Backups include transcripts and learning evidence, never your API key. Import adds conversations with new IDs. Learning stays on this iPhone unless you export it.") }
             if let message { Section { Text(message) } }
         }.scrollContentBackground(.hidden).background(MuralColor.cream).navigationTitle("Learning data")
-            .fileExporter(isPresented: $exporting, document: backup, contentType: .json, defaultFilename: "Mural-learning-backup") { result in
+            .fileExporter(isPresented: $exporting, document: backup, contentType: .json, defaultFilename: "Vani-learning-backup") { result in
                 if case .failure(let error) = result { message = error.localizedDescription }
             }
             .fileImporter(isPresented: $importing, allowedContentTypes: [.json]) { result in
@@ -658,7 +658,7 @@ private struct AboutMuralView: View {
                 Button("Open-source notices") { notices = true }
             }
             Section {
-                Text("For Mural minutes, audio and selected text pass through Mural’s server to OpenAI. With your own key, they go directly to OpenAI. Raw audio is not saved by Mural.")
+                Text("For Vani minutes, audio and selected text pass through Vani’s server to OpenAI. With your own key, they go directly to OpenAI. Raw audio is not saved by Vani.")
             }
         }.scrollContentBackground(.hidden).background(MuralColor.cream).navigationTitle("About \(AppBrand.name)")
             .sheet(isPresented: $notices) {

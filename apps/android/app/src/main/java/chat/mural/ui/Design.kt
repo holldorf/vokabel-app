@@ -180,10 +180,10 @@ internal fun muralPhase(active: Boolean = true, slow: Boolean = false): Float {
         onDispose { owner.lifecycle.removeObserver(observer) }
     }
     if (!active || !foreground || !animations || chat.mural.BuildConfig.BUILD_TYPE == "uiTest") return 0f
-    val phase by rememberInfiniteTransition(label = "Mural motion").animateFloat(
+    val phase by rememberInfiniteTransition(label = "Vani motion").animateFloat(
         initialValue = 0f, targetValue = (PI * 40).toFloat(),
         animationSpec = infiniteRepeatable(tween(if (slow) 897_597 else 174_533,
-            easing = androidx.compose.animation.core.LinearEasing), RepeatMode.Restart), label = "Mural phase")
+            easing = androidx.compose.animation.core.LinearEasing), RepeatMode.Restart), label = "Vani phase")
     return phase
 }
 

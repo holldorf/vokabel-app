@@ -309,8 +309,8 @@ public enum ArchiveError: Error, LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .tooLarge: "This backup is too large to import."
-        case .unsupportedVersion: "This backup needs a newer version of Mural."
-        case .unsupportedLanguage: "This backup contains a language module that this version of Mural does not support."
+        case .unsupportedVersion: "This backup needs a newer version of Vani."
+        case .unsupportedLanguage: "This backup contains a language module that this version of Vani does not support."
         case .invalid: "This backup has invalid or duplicate records."
         }
     }

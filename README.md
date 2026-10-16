@@ -1,8 +1,8 @@
-# Vokabel App
+# Vani
 
 **Deutsch sprechen üben – für deinen Alltag in der Pflege.**
 
-Die Vokabel App ist eine native iPhone- und Android-App für ausländische Pflegekräfte, die in Deutschland arbeiten oder dort anfangen wollen. Man übt Deutsch im Gespräch mit einer KI: per Stimme oder getippt, mit Untertiteln in der eigenen Sprache und mit Vokabeln, die in späteren Gesprächen wiederkommen.
+Vani ist eine native iPhone- und Android-App für ausländische Pflegekräfte, die in Deutschland arbeiten oder dort anfangen wollen. Man übt Deutsch im Gespräch mit einer KI: per Stimme oder getippt, mit Untertiteln in der eigenen Sprache und mit Vokabeln, die in späteren Gesprächen wiederkommen.
 
 ## Was die App kann
 

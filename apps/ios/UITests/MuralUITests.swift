@@ -140,7 +140,7 @@ final class MuralUITests: XCTestCase {
         let picker = app.buttons["onboarding-language-picker"]
         XCTAssertTrue(picker.waitForExistence(timeout: 10))
         XCTAssertTrue(picker.label.contains("German · Germany"))
-        XCTAssertTrue(app.staticTexts["Vokabel App"].exists)
+        XCTAssertTrue(app.staticTexts["Vani"].exists)
         XCTAssertTrue(app.staticTexts["Für deinen Alltag in der Pflege."].exists)
         reveal(picker, in: app)
         picker.tap()
@@ -271,9 +271,9 @@ final class MuralUITests: XCTestCase {
             let app = XCUIApplication()
             app.launchArguments = ["--preview", "--ended-conversation", "--test-end-notice"] + (inactivity ? ["--test-inactivity"] : [])
             app.launch()
-            let expected = inactivity ? "Mural ended this quiet session to avoid running up usage." : "Conversation saved. Final voice usage is unconfirmed."
+            let expected = inactivity ? "Vani ended this quiet session to avoid running up usage." : "Conversation saved. Final voice usage is unconfirmed."
             XCTAssertTrue(app.staticTexts[expected].waitForExistence(timeout: 10))
-            XCTAssertFalse(app.staticTexts["Mural will make that a little simpler."].exists)
+            XCTAssertFalse(app.staticTexts["Vani will make that a little simpler."].exists)
         }
     }
 
@@ -473,7 +473,7 @@ final class MuralUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Done"].exists)
         app.navigationBars["API key"].buttons["Done"].tap()
         XCTAssertFalse(app.buttons["advanced-api-key"].exists)
-        XCTAssertTrue(app.staticTexts["Mural minutes"].exists)
+        XCTAssertTrue(app.staticTexts["Vani minutes"].exists)
         app.buttons["Learning backup & data"].tap()
         XCTAssertTrue(app.buttons["Export learning backup"].exists)
         app.navigationBars["Learning data"].buttons.element(boundBy: 0).tap()
@@ -638,7 +638,7 @@ final class MuralUITests: XCTestCase {
         XCTAssertEqual(balance.label, "About 41 min")
         XCTAssertTrue(app.staticTexts["estimated conversation time remaining"].exists)
         let screen = XCTAttachment(screenshot: app.screenshot())
-        screen.name = "Account with mixed Mural minutes"; screen.lifetime = .keepAlways; add(screen)
+        screen.name = "Account with mixed Vani minutes"; screen.lifetime = .keepAlways; add(screen)
     }
 
     func testPaidOnlyMuralMinutesStayAvailable() {
@@ -651,7 +651,7 @@ final class MuralUITests: XCTestCase {
         XCTAssertTrue(balance.waitForExistence(timeout: 5))
         XCTAssertEqual(balance.label, "About 36 min")
         let screen = XCTAttachment(screenshot: app.screenshot())
-        screen.name = "Account with paid Mural minutes"; screen.lifetime = .keepAlways; add(screen)
+        screen.name = "Account with paid Vani minutes"; screen.lifetime = .keepAlways; add(screen)
     }
 
     func testPaidOnlyBalanceCanSwitchFromPersonalKey() {
@@ -662,11 +662,11 @@ final class MuralUITests: XCTestCase {
         let access = app.buttons["settings-conversation-access"]
         XCTAssertTrue(access.waitForExistence(timeout: 5))
         access.tap()
-        app.buttons["Mural minutes"].tap()
+        app.buttons["Vani minutes"].tap()
         let balance = app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "About 36 min")).firstMatch
         XCTAssertTrue(balance.waitForExistence(timeout: 5))
-        app.buttons["Use Mural minutes"].tap()
-        XCTAssertTrue(access.label.contains("Mural minutes"))
+        app.buttons["Use Vani minutes"].tap()
+        XCTAssertTrue(access.label.contains("Vani minutes"))
     }
 
     func testReservedPaidMinutesAreNotShownAsSpendable() {
@@ -691,16 +691,16 @@ final class MuralUITests: XCTestCase {
         let key = app.buttons["advanced-api-key"]
         XCTAssertTrue(key.waitForExistence(timeout: 5))
         key.tap()
-        app.buttons["Use Mural minutes"].tap()
+        app.buttons["Use Vani minutes"].tap()
         XCTAssertTrue(app.navigationBars["Conversation access"].waitForExistence(timeout: 5))
-        let confirm = app.buttons["Use Mural minutes"]
+        let confirm = app.buttons["Use Vani minutes"]
         XCTAssertTrue(confirm.waitForExistence(timeout: 5))
         let balance = app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "8 min 54 sec")).firstMatch
         XCTAssertTrue(balance.waitForExistence(timeout: 5))
         confirm.tap()
         let access = app.buttons["settings-conversation-access"]
         XCTAssertTrue(access.waitForExistence(timeout: 5))
-        XCTAssertTrue(access.label.contains("Mural minutes"))
+        XCTAssertTrue(access.label.contains("Vani minutes"))
         app.buttons["Done"].tap()
         XCTAssertTrue(app.buttons["start-conversation"].exists)
     }
@@ -715,26 +715,26 @@ final class MuralUITests: XCTestCase {
         XCTAssertTrue(access.label.contains("My API key"))
 
         access.tap()
-        app.buttons["Mural minutes"].tap()
-        XCTAssertTrue(app.buttons["Use Mural minutes"].waitForExistence(timeout: 5))
+        app.buttons["Vani minutes"].tap()
+        XCTAssertTrue(app.buttons["Use Vani minutes"].waitForExistence(timeout: 5))
         app.buttons["Cancel"].tap()
         XCTAssertTrue(access.label.contains("My API key"))
 
         access.tap()
-        app.buttons["Mural minutes"].tap()
-        XCTAssertTrue(app.buttons["Use Mural minutes"].waitForExistence(timeout: 5))
-        app.buttons["Use Mural minutes"].tap()
-        XCTAssertTrue(access.label.contains("Mural minutes"))
+        app.buttons["Vani minutes"].tap()
+        XCTAssertTrue(app.buttons["Use Vani minutes"].waitForExistence(timeout: 5))
+        app.buttons["Use Vani minutes"].tap()
+        XCTAssertTrue(access.label.contains("Vani minutes"))
     }
 
     func testSettingsKeepLicensesInNoticesWithoutTransportDetails() {
         let app = launch()
         app.buttons["Settings"].tap()
         for _ in 0..<6 {
-            if app.buttons["About Vokabel App"].isHittable { break }
+            if app.buttons["About Vani"].isHittable { break }
             app.swipeUp()
         }
-        app.buttons["About Vokabel App"].tap()
+        app.buttons["About Vani"].tap()
         for _ in 0..<6 {
             if app.buttons["Open-source notices"].isHittable { break }
             app.swipeUp()
@@ -983,7 +983,7 @@ final class MuralUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = ["--preview", "--preview-inactivity-timer"]
         app.launch()
-        let ended = app.staticTexts["Mural ended this quiet session to avoid running up usage."]
+        let ended = app.staticTexts["Vani ended this quiet session to avoid running up usage."]
         XCTAssertTrue(ended.waitForExistence(timeout: 16))
         XCTAssertFalse(app.staticTexts["microphone-status"].exists)
     }
@@ -1007,7 +1007,7 @@ final class MuralUITests: XCTestCase {
         app.launch()
         let alert = app.alerts.firstMatch
         XCTAssertTrue(alert.waitForExistence(timeout: 10))
-        XCTAssertTrue(alert.staticTexts["No Mural minutes are available for a new conversation. Check Account or use your own API key."].exists)
+        XCTAssertTrue(alert.staticTexts["No Vani minutes are available for a new conversation. Check Account or use your own API key."].exists)
         XCTAssertTrue(alert.buttons["Check minutes"].exists)
         alert.buttons["Use my API key"].tap()
         XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5))
@@ -1021,7 +1021,7 @@ final class MuralUITests: XCTestCase {
         let alert = app.alerts.firstMatch
         XCTAssertTrue(alert.waitForExistence(timeout: 10))
         alert.buttons["Sign in"].tap()
-        XCTAssertTrue(app.staticTexts["Welcome to Mural"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Welcome to Vani"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["managed-apple-sign-in"].exists)
     }
 
