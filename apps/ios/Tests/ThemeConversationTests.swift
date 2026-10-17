@@ -22,6 +22,28 @@ final class ThemeConversationTests: XCTestCase {
         }
     }
 
+    func testRepeatingAThemeUsesEveryTwistBeforeAnyRepeats() throws {
+        let german = try XCTUnwrap(LanguageRegistry.module(for: "de"))
+        let learner = LearningEngine.project([], languageID: "de")
+        let count = ConversationTheme.variations.count
+        XCTAssertGreaterThanOrEqual(count, 10)
+        for theme in german.themes {
+            XCTAssertEqual(theme.varied(round: 0), theme, theme.id)
+            let rounds = (1...count).map { theme.varied(round: $0).situation }
+            XCTAssertEqual(Set(rounds).count, count, "Every twist once before repeating: \(theme.id)")
+            XCTAssertTrue(rounds.allSatisfy { $0.hasPrefix(theme.situation + " This time: ") }, theme.id)
+            XCTAssertEqual(theme.varied(round: count + 1), theme.varied(round: 1), theme.id)
+            let varied = theme.varied(round: 4)
+            let prompt = TeachingPolicy.voice(language: german, learner: learner, theme: varied, interests: "", meaningLanguage: "English")
+            XCTAssertTrue(prompt.contains(varied.situation), theme.id)
+        }
+        let current = ConversationTheme("current", "Topic", "From the world today", "newspaper", "Interests", "Sourced notes.", 0)
+        XCTAssertEqual(current.varied(round: 3), current)
+        // Android's ThemeVariationsTest asserts the identical text, so both apps walk the same order.
+        XCTAssertEqual(german.themes.first { $0.id == "coffee" }?.varied(round: 1).situation,
+            "Meet in a neighbourhood café in Germany. Order a drink and chat. Use polite greetings with staff and follow the learner's interests. This time: Bring in one unexpected small problem halfway through.")
+    }
+
     func testSelectingAnotherThemeReplacesThePreviousDirectionWithoutAnotherConfirmation() {
         let language = LanguageModule.norwegian
         let coffee = language.themes.first { $0.id == "coffee" }!

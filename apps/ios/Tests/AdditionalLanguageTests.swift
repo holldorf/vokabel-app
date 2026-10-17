@@ -53,7 +53,7 @@ final class AdditionalLanguageTests: XCTestCase {
     }
 
     func testCareWorkThemesAreSharedAndOverriddenInGerman() throws {
-        let careIDs = ["handover", "admission", "medication", "relatives", "wardround", "pain", "bodycare", "emergency", "phonecall", "documentation", "dementia", "discharge", "team"]
+        let careIDs = ["handover", "admission", "medication", "relatives", "wardround", "pain", "bodycare", "emergency", "phonecall", "documentation", "dementia", "discharge", "team", "nightshift", "meals", "vitals", "palliative", "complaint", "homecare", "onboarding", "appraisal", "exam", "hygiene", "biography", "refusal"]
         XCTAssertEqual(Array(ConversationTheme.shared.prefix(careIDs.count).map(\.id)), careIDs)
         XCTAssertEqual(Set(ConversationTheme.shared.map(\.id)).count, ConversationTheme.shared.count)
         for theme in ConversationTheme.shared where careIDs.contains(theme.id) {
@@ -68,6 +68,10 @@ final class AdditionalLanguageTests: XCTestCase {
             XCTAssertFalse(override.situation.contains("Norway"), id)
         }
         XCTAssertEqual(german.themes.first { $0.id == "handover" }?.title, "Die Übergabe")
+        for id in ["authorities", "doctor", "flatviewing", "landlord", "bank", "school", "jobinterview", "recognition", "pharmacy", "post"] {
+            XCTAssertEqual(ConversationTheme.shared.first { $0.id == id }?.category, "Life in Germany", id)
+            XCTAssertEqual(german.themeOverrides[id]?.category, "Life in Germany", id)
+        }
         XCTAssertTrue(german.speechGuidance.contains("care worker"))
         XCTAssertTrue(german.teachingFocus[2].contains("handover"))
         let voice = TeachingPolicy.voice(language: german, learner: LearningEngine.project([], languageID: "de"), theme: german.themes[0], interests: "", meaningLanguage: "English")

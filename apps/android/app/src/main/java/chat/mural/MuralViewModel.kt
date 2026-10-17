@@ -703,9 +703,19 @@ class MuralViewModel(application: Application) : AndroidViewModel(application) {
         if (!isRunning && LanguageRegistry.get(id) != null) updatePreferences(archive.preferences.copy(learningLanguageID = id))
     }
     private var startingWithHistory = false
+    /**
+     * How often this theme was practised before. The session instructions carry the matching twist
+     * (see [varied]), so practising a situation again does not repeat the last conversation.
+     * Short appended instructions keep the plain theme to stay within their size cap.
+     */
+    private var themeRound = 0
+    private val sessionTheme get() = selectedTheme?.varied(themeRound)
     fun chooseTheme(theme: ConversationTheme?) {
         if (!isRunning && session != null) resetConversation()
         selectedTheme = theme
+        themeRound = theme?.let { chosen ->
+            archive.sessions.count { it.themeID == chosen.id && it.languageID == language.id && it.id != session?.id }
+        } ?: 0
         if (theme?.id != "current") topicResult = null
         if (state == "active" || state == "connecting") {
             updateSession { it.themeID = theme?.id; it.title = theme?.title ?: language.defaultTitle }
@@ -778,7 +788,7 @@ class MuralViewModel(application: Application) : AndroidViewModel(application) {
             fail(error, R.string.error_voice_connect_failed); return
         }
         val module = language
-        val instructions = TeachingPolicy.voice(module, learner, selectedTheme, archive.preferences.interests, archive.preferences.meaningLanguage)
+        val instructions = TeachingPolicy.voice(module, learner, sessionTheme, archive.preferences.interests, archive.preferences.meaningLanguage)
         val history = ConversationHistory.messages(continuing ?: session)
         startingWithHistory = history.isNotEmpty()
         if (choice == ConversationProvider.HOSTED_MINUTES) accountChangeBlocked = true
@@ -1108,7 +1118,7 @@ class MuralViewModel(application: Application) : AndroidViewModel(application) {
         if (voiceSession) { activity.learnerEngaged(activityNow()); inactivitySeconds = null }; working = true
         actionJob = viewModelScope.launch {
             try {
-                val instructions = if (voiceSession) TeachingPolicy.typedReply(language) else TeachingPolicy.voice(language, learner, selectedTheme, archive.preferences.interests, archive.preferences.meaningLanguage) + "\n" + TeachingPolicy.typedReply(language)
+                val instructions = if (voiceSession) TeachingPolicy.typedReply(language) else TeachingPolicy.voice(language, learner, sessionTheme, archive.preferences.interests, archive.preferences.meaningLanguage) + "\n" + TeachingPolicy.typedReply(language)
                 val result = teaching(id, HelperPurpose.TYPED_REPLY, UUID.randomUUID().toString(), instructions, helperContext(draft))
                 if (token != generation || session?.id != id || state != "active") return@launch
                 updateSession { addUsage(it, result.usage) }

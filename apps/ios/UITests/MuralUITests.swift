@@ -185,6 +185,10 @@ final class MuralUITests: XCTestCase {
         // The care-work tiles come first; the everyday tiles sit below the fold of the lazy grid.
         app.buttons["Everyday"].tap()
         XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Ein Kaffee?")).firstMatch.waitForExistence(timeout: 5))
+        app.buttons["Life in Germany"].tap()
+        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Auf dem Amt")).firstMatch.waitForExistence(timeout: 5))
+        let life = XCTAttachment(screenshot: app.screenshot())
+        life.name = "Themes - life in Germany"; life.lifetime = .keepAlways; add(life)
         app.buttons["Care work"].tap()
         let screen = XCTAttachment(screenshot: app.screenshot())
         screen.name = "Themes - care work"; screen.lifetime = .keepAlways; add(screen)

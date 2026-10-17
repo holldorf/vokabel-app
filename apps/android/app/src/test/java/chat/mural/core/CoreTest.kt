@@ -66,7 +66,7 @@ class CoreTest {
     }
     @Test fun languageRegistryAndThemesStayStable() {
         assertEquals(listOf("nb","es","en","fr","de","it","pt","zh","sr","el","tl","nl","ru"),LanguageRegistry.all.map { it.id })
-        assertEquals(37,Themes.shared.map { it.id }.toSet().size)
+        assertEquals(59,Themes.shared.map { it.id }.toSet().size)
         assertEquals("Salut !",LanguageRegistry.get("fr")!!.greeting)
         for ((id, locale, greeting) in listOf(Triple("de","de-DE","Hallo!"),Triple("it","it-IT","Ciao!"),Triple("pt","pt-BR","Olá!"),Triple("zh","zh-CN","你好！"),Triple("sr","sr-Latn-RS","Zdravo!"))) {
             assertEquals(locale,LanguageRegistry.get(id)!!.locale); assertEquals(greeting,LanguageRegistry.get(id)!!.greeting)
@@ -83,7 +83,8 @@ class CoreTest {
         assertEquals("de",LanguageRegistry.preferredID)
         assertEquals(listOf("de"),LanguageRegistry.selectable.map { it.id })
         assertEquals("de",Preferences().learningLanguageID)
-        val careIDs=listOf("handover","admission","medication","relatives","wardround","pain","bodycare","emergency","phonecall","documentation","dementia","discharge","team")
+        val careIDs=listOf("handover","admission","medication","relatives","wardround","pain","bodycare","emergency","phonecall","documentation","dementia","discharge","team",
+            "nightshift","meals","vitals","palliative","complaint","homecare","onboarding","appraisal","exam","hygiene","biography","refusal")
         val german=LanguageRegistry.get("de")!!
         assertEquals(careIDs,Themes.shared.take(careIDs.size).map { it.id })
         assertTrue(Themes.shared.filter { it.id in careIDs }.all { it.category=="Care work" && it.situation.startsWith("Role-play only") })

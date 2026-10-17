@@ -17,7 +17,9 @@ This fork offers only German to learners, without dropping the other modules fro
 
 If an imported backup uses a language that is not selectable, the Settings picker keeps that language listed so the current selection stays valid, while onboarding pre-selects `preferredID` instead of the stored language. `scripts/export_android_content.py` exports `selectable` and `preferredID` to Kotlin and rejects a `selectable` entry that is not in `all`.
 
-The care-work situations are shared themes (category `Care work`, IDs `handover`, `admission`, `medication`, `relatives`, `wardround`, `pain`, `bodycare`, `emergency`, `phonecall`, `documentation`, `dementia`, `discharge`, `team`) because a module can only override existing shared IDs, not add its own. The German module overrides all thirteen with German titles and Germany-specific role-play instructions; other modules inherit the neutral English versions. Every situation starts with a role-play disclaimer and gives no real medical, dosage or legal advice.
+The care-work situations are shared themes (category `Care work`, 25 IDs from `handover` to `refusal`) because a module can only override existing shared IDs, not add its own. The same applies to the ten `Life in Germany` situations (`authorities` to `post`). The German module overrides all of them with German titles and Germany-specific role-play instructions; other modules inherit the neutral English versions. Every care situation starts with a role-play disclaimer and gives no real medical, dosage or legal advice.
+
+Repeated practice: `ConversationTheme.variations` lists twists such as an impatient partner or a small misunderstanding. When a learner chooses a theme they have practised before, the session instructions use `theme.varied(round:)`, which appends the next twist; every twist is used once before any repeats. The opening greeting and short appended theme updates keep the plain situation so they stay within the 1,000-character instruction cap. Android receives the list through `export_android_content.py` and mirrors `varied` in `ThemeVariations.kt`.
 
 | Storage ID | Learning target | Locale |
 | --- | --- | --- |

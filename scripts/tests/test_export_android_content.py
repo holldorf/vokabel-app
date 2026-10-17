@@ -82,6 +82,10 @@ public struct ConversationTheme: Identifiable, Hashable, Sendable {
     public static let shared: [Self] = [
         .init("coffee", "A coffee?", "Something warm", "cup", "Everyday", "Order a drink.", 0)
     ]
+    public static let variations: [String] = [
+        "Speak a little faster.",
+        "Add a small problem."
+    ]
 }
 '''
 
@@ -209,6 +213,20 @@ class ExportAndroidContentTests(unittest.TestCase):
             with self.assertRaises(SystemExit) as ctx:
                 eac.generate(core)
             self.assertIn('LanguageRegistry.selectable', str(ctx.exception))
+
+    def test_theme_variations_are_exported_in_order(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            core = write_core(pathlib.Path(tmp), ['Norwegian', 'Spanish'])
+            output = eac.generate(core)
+            self.assertIn('    val variations = listOf(\n        "Speak a little faster.",\n        "Add a small problem."\n    )', output)
+
+    def test_missing_theme_variations_fail(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            core = write_core(pathlib.Path(tmp), ['Norwegian', 'Spanish'])
+            themes = core / 'Themes.swift'
+            themes.write_text(themes.read_text().split('    public static let variations')[0] + '}\n')
+            with self.assertRaises(SystemExit):
+                eac.generate(core)
 
     def test_generation_is_deterministic(self):
         with tempfile.TemporaryDirectory() as tmp:

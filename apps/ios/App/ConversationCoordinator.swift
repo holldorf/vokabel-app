@@ -191,7 +191,7 @@ import MuralCore
         let continuingOwner = continuationOwner
         let history = ConversationContinuation.history(continuing?.passages.map { ($0.speaker, $0.text) } ?? [])
         startingWithHistory = !history.isEmpty
-        let instructions = TeachingPolicy.voice(language: language, learner: learner, theme: selectedTheme, interests: store.preferences.interests, meaningLanguage: store.preferences.meaningLanguage)
+        let instructions = TeachingPolicy.voice(language: language, learner: learner, theme: sessionTheme, interests: store.preferences.interests, meaningLanguage: store.preferences.meaningLanguage)
         api.conversationProvider = conversationProvider
         api.hostedLease = nil
         if conversationProvider == .personalKey { api.beginVoiceCredential() }
@@ -328,9 +328,17 @@ import MuralCore
         store.updatePreferences { $0.meaningLanguage = value }
         scheduleTranslation()
     }
+    /// How often this theme was practised before. The session instructions carry the matching twist
+    /// (see `ConversationTheme.varied`), so practising a situation again does not repeat the last
+    /// conversation. Short appended instructions keep the plain theme to stay within their size cap.
+    private var themeRound = 0
+    private var sessionTheme: ConversationTheme? { selectedTheme?.varied(round: themeRound) }
     func chooseTheme(_ theme: ConversationTheme?) {
         if !isRunning, session != nil { resetConversation() }
         selectedTheme = theme
+        themeRound = theme.map { theme in
+            store.sessions.filter { $0.themeID == theme.id && $0.languageID == language.id && $0.id != session?.id }.count
+        } ?? 0
         if theme?.id != "current" { pendingTopic = nil }
         if state == .active || state == .connecting {
             session?.themeID = theme?.id; session?.title = theme?.title ?? language.defaultTitle

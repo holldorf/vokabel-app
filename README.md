@@ -7,7 +7,9 @@ Halani ist eine native iPhone- und Android-App für ausländische Pflegekräfte,
 ## Was die App kann
 
 - **Nur Deutsch als Lernsprache.** Alte Backups in anderen Sprachen lassen sich weiterhin importieren und lesen (`LanguageRegistry.all`); wählbar ist nur Deutsch (`LanguageRegistry.selectable`).
-- **Pflege-Rollenspiele:** Der Themen-Tab enthält die Kategorie „Care work“ mit 13 Situationen: Übergabe, Aufnahmegespräch, Medikamentengabe, Angehörige, Visite, Schmerzen, Grundpflege, Sturz melden, Telefon, Pflegebericht, Demenz, Entlassung und Team. Dazu kommen Alltagsthemen.
+- **Pflege-Rollenspiele:** Der Themen-Tab enthält die Kategorie „Care work“ mit 25 Situationen, von Übergabe, Aufnahmegespräch und Medikamentengabe über Nachtdienst, Vitalzeichen, Beschwerden, ambulante Pflege und Biografiearbeit bis zum Prüfungstraining für die Fachsprachprüfung.
+- **Leben in Deutschland:** 10 Situationen für den Alltag nach dem Umzug, etwa Bürgeramt, Hausarzt, Wohnungsbesichtigung, Bank, Kita, Vorstellungsgespräch und Anerkennung der Berufsqualifikation. Dazu kommen 24 Alltagsthemen.
+- **Kein Gespräch doppelt:** Wer ein Thema wiederholt, bekommt jedes Mal eine andere Wendung, etwa ein ungeduldiges Gegenüber, ein kleines Missverständnis oder einen Zeitdruck. Zwölf Wendungen laufen der Reihe nach durch, bevor sich eine wiederholt.
 - **Untertitel in der Herkunftssprache**, unter anderem Tagalog (Filipino), Vietnamesisch, Türkisch, Rumänisch, Russisch, Hindi, Kroatisch, Serbisch, Albanisch, Arabisch, Polnisch und Ukrainisch.
 - **Vokabeln und Karteikarten:** Wörter aus den Gesprächen werden gesammelt und mit Wiederholungsbalken angezeigt.
 - **Daten bleiben auf dem Gerät.** Gespräche, Vokabeln und Einstellungen werden lokal gespeichert und lassen sich als JSON-Backup exportieren.
