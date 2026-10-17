@@ -19,22 +19,43 @@ enum MuralColor {
 }
 
 enum AppBrand {
-    static let name = "Vani"
+    static let name = "Halani"
     static let tagline = "Für deinen Alltag in der Pflege."
 }
 
 struct Brand: View {
     var body: some View {
         HStack(spacing: 8) {
-            Image("HolldorfLogo")
+            Image("BrandLogo")
                 .resizable()
                 .scaledToFit()
                 .frame(width: 36, height: 36)
                 .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                 .accessibilityHidden(true)
-            Text(AppBrand.name).font(.system(.headline, design: .rounded, weight: .bold))
-                .fixedSize(horizontal: false, vertical: true)
+            Wordmark()
         }.foregroundStyle(MuralColor.ink).accessibilityElement(children: .ignore).accessibilityLabel(AppBrand.name)
+    }
+}
+
+/// "halani" with the dot of the final i drawn as the rose voice dot from the app icon.
+/// Decorative: the parent supplies the accessible name.
+struct Wordmark: View {
+    var body: some View {
+        let font = Font.system(.headline, design: .rounded, weight: .bold)
+        HStack(spacing: 0) {
+            Text("halan").font(font)
+            // U+0131 (dotless i), so the voice dot replaces the glyph's own dot.
+            Text("\u{0131}").font(font).overlay(alignment: .top) {
+                GeometryReader { geometry in
+                    let side = geometry.size.height * 0.22
+                    Circle().fill(MuralColor.rose).shadow(color: MuralColor.accent.opacity(0.7), radius: side * 0.5)
+                        .frame(width: side, height: side)
+                        .position(x: geometry.size.width / 2, y: geometry.size.height * 0.24)
+                }
+            }
+        }
+        .fixedSize(horizontal: false, vertical: true)
+        .accessibilityHidden(true)
     }
 }
 
@@ -47,30 +68,9 @@ struct SoftGlass: ViewModifier {
     }
 }
 
-struct OrbShape: Shape {
-    var phase: Double
-    var energy: Double
-    func path(in rect: CGRect) -> Path {
-        let points = (0..<12).map { index -> CGPoint in
-            let a = Double(index) / 12 * .pi * 2
-            let wave = sin(a * 3 + phase) * 0.021 + cos(a * 2 - phase * 0.7) * (0.012 + energy * 0.025)
-            let radius = min(rect.width, rect.height) * (0.47 + wave)
-            return CGPoint(x: rect.midX + cos(a) * radius, y: rect.midY + sin(a) * radius)
-        }
-        var p = Path()
-        for i in 0..<12 {
-            let current = points[i], next = points[(i + 1) % 12]
-            let midpoint = CGPoint(x: (current.x + next.x) / 2, y: (current.y + next.y) / 2)
-            if i == 0 {
-                let previous = points[11]
-                p.move(to: CGPoint(x: (previous.x + current.x) / 2, y: (previous.y + current.y) / 2))
-            }
-            p.addQuadCurve(to: midpoint, control: current)
-        }
-        p.closeSubpath(); return p
-    }
-}
-
+/// Halani's speaking visual: a glowing aura ring. A soft halo in rose, accent, pink and cream slowly
+/// orbits the ring, and both halo and ring swell with the voice level (`energy`, 0…1).
+/// The name stays `MuralOrb` so upstream call sites keep working.
 struct MuralOrb: View {
     var energy: Double = 0
     var listening = false
@@ -80,37 +80,23 @@ struct MuralOrb: View {
     var body: some View {
         TimelineView(.animation(minimumInterval: 1.0 / 30, paused: reduceMotion || !active || scenePhase != .active)) { timeline in
             let t = reduceMotion ? 0 : timeline.date.timeIntervalSinceReferenceDate
-            let phase = t * 0.72
             let e = reduceMotion ? 0 : min(1, max(0, energy))
+            // A gentle idle breath keeps the ring alive while nobody is speaking.
+            let breath = reduceMotion ? 0 : (sin(t * 1.1) + 1) / 2 * 0.06
             GeometryReader { geometry in
                 let side = min(geometry.size.width, geometry.size.height)
+                let ring = side * 0.72
                 ZStack {
-                    Ellipse().fill(MuralColor.orange.opacity(0.14)).frame(width: side * 0.57, height: side * 0.075)
-                        .blur(radius: 10).offset(y: side * 0.47)
-                    Circle().stroke(MuralColor.orange.opacity(listening ? 0.18 : 0), lineWidth: 1).padding(-6)
-                    Circle().stroke(MuralColor.orange.opacity(listening ? 0.10 : 0), lineWidth: 1).padding(-16)
-                    ZStack {
-                        MeshGradient(width: 3, height: 3, points: [
-                            [0,0], [0.5,0], [1,0],
-                            [0,0.5], [Float(0.5 + sin(phase) * 0.08), Float(0.5 + cos(phase) * 0.06)], [1,0.5],
-                            [0,1], [0.5,1], [1,1]
-                        ], colors: [MuralColor.ink, MuralColor.accent, MuralColor.rose,
-                                    MuralColor.rose, MuralColor.burgundy, MuralColor.accent,
-                                    MuralColor.burgundy, MuralColor.orange, MuralColor.rose])
-                        Ellipse().fill(.white.opacity(0.65)).frame(width: side * 0.48, height: side * 0.15).blur(radius: 13)
-                            .rotationEffect(.degrees(-28)).offset(x: -side * 0.17, y: -side * 0.28)
-                        Ellipse().stroke(MuralColor.butter.opacity(0.48), lineWidth: 16).frame(width: side * 1.2, height: side * 0.5)
-                            .blur(radius: 12).rotationEffect(.degrees(-15)).offset(y: side * 0.54)
-                    }
-                    .mask(OrbShape(phase: phase, energy: e))
-                    .shadow(color: MuralColor.orange.opacity(0.12), radius: 16, y: 10)
-                    .rotationEffect(.degrees(sin(phase * 0.5) * 3))
-                    .scaleEffect(1 + e * 0.045)
-                    .offset(y: reduceMotion ? 0 : sin(t * 0.9) * 4 - 5)
-                    Circle().fill(RadialGradient(colors: [MuralColor.ink, MuralColor.rose, MuralColor.burgundy.opacity(0.5)], center: .topLeading, startRadius: 0, endRadius: 12))
-                        .frame(width: 12, height: 12).offset(x: side * 0.55, y: -side * 0.24)
-                    Circle().fill(MuralColor.rose).frame(width: 7, height: 7).offset(x: -side * 0.54, y: side * 0.26)
-                }.frame(width: side, height: side).frame(maxWidth: .infinity, maxHeight: .infinity)
+                    Circle().stroke(AngularGradient(colors: [MuralColor.rose, MuralColor.accent, MuralColor.orange, MuralColor.ink, MuralColor.rose],
+                                                    center: .center, angle: .degrees(t * 60)),
+                                    lineWidth: side * (0.06 + 0.08 * max(e, breath)))
+                        .frame(width: ring, height: ring).blur(radius: side * 0.05)
+                    Circle().stroke(MuralColor.ink.opacity(0.85), lineWidth: max(1, side * 0.012)).frame(width: ring, height: ring)
+                    // Listening: a faint outer ring, as the orb had.
+                    Circle().stroke(MuralColor.accent.opacity(listening ? 0.22 : 0), lineWidth: 1).frame(width: ring * 1.18, height: ring * 1.18)
+                }
+                .scaleEffect(0.92 + 0.12 * max(e, breath))
+                .frame(width: side, height: side).frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }.accessibilityHidden(true)
     }

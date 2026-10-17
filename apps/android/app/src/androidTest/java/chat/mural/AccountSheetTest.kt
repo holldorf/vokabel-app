@@ -41,7 +41,7 @@ class AccountSheetTest {
         compose.onNodeWithTag("account-google").assertIsNotEnabled()
         assertEquals(0, signIns)
         compose.onNodeWithText("Make yourself at home.").assertIsDisplayed()
-        compose.onNodeWithText("You can keep using Vani without an account.", substring = true).assertExists()
+        compose.onNodeWithText("You can keep using Halani without an account.", substring = true).assertExists()
     }
     @Test fun accountShowsMinutesAndDeletionRequiresConfirmation() {
         var deletions = 0
@@ -54,7 +54,7 @@ class AccountSheetTest {
         capture("09-member-account")
         compose.onNodeWithText(context.getString(R.string.account_delete_action)).performScrollTo().performClick()
         assertEquals(0, deletions)
-        compose.onNodeWithText("Delete your Vani account", substring = true).assertIsDisplayed()
+        compose.onNodeWithText("Delete your Halani account", substring = true).assertIsDisplayed()
         compose.onNodeWithTag("account-confirm-delete").performClick()
         compose.runOnIdle { assertEquals(1, deletions) }
     }

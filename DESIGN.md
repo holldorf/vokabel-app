@@ -1,8 +1,13 @@
-# Vani native identity
+# Halani native identity
 
 ## Approved direction
 
-The user approved the intertwined cream/rose H on burgundy as the app icon.
+The app icon is a rounded lowercase "h" whose stem ends in a speech-bubble tail, with a
+glowing rose voice dot, on burgundy `#1E0C15`. The in-app header pairs that icon with the
+"halani" wordmark, whose i-dot is the same rose voice dot (`Wordmark` on iOS and Android).
+Both replaced the earlier Holldorf "H" monogram when the app was renamed to Halani.
+`swift scripts/make_icon.swift <dir>` renders the 1024px icon, the Android themed-icon
+mask and the 512px Play Store icon from vector geometry.
 The iOS and Android UI now follows a dark burgundy direction, while retaining
 existing layouts, content, controls and the animated speaking orb. The later
 request explicitly rejected LiveKit UI: no LiveKit dependency, waveform or
@@ -48,8 +53,10 @@ an accessibility-conformance claim.
   were also reviewed; the system Form retains native dark row surfaces.
 - Final native captures are local in `.gg/screenshots/holldorf-ios-final.png` and
   `.gg/screenshots/holldorf-android-final.png` in the parent project, not shipped.
-- The iOS app icon is opaque RGB, 1024×1024. Android's foreground and themed icon
-  share the same alpha mask; the visible mark fits the 33dp adaptive safe radius.
+- The iOS app icon is opaque RGB, 1024×1024, and the Android launcher foreground is
+  the byte-identical file at a 10% inset over `brand_icon_background` (`#1E0C15`), as
+  `scripts/check_android_release.py` requires. The themed icon uses the "h" and dot
+  silhouette at the same inset, inside the adaptive safe circle.
 - iOS verification used the existing WebRTC package cache with a fresh derived
   build directory and `ARCHS=arm64 ONLY_ACTIVE_ARCH=YES` for this Apple Silicon
   simulator. No dependency or project build-setting changes were needed.

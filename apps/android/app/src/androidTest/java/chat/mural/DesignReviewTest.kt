@@ -47,9 +47,9 @@ class DesignReviewTest {
     }
     @Test fun dropdownOnboardingAndCoreScreensKeepTheFloatingNavigationAndPrimaryActionVisible() {
         compose.onNodeWithTag("onboarding-language-picker").assertIsDisplayed()
-        compose.onNodeWithText("Vani").assertIsDisplayed()
+        compose.onNodeWithText("Halani").assertIsDisplayed()
         compose.onNodeWithText("Für deinen Alltag in der Pflege.").assertIsDisplayed()
-        assertEquals("Vani", compose.activity.applicationInfo.loadLabel(compose.activity.packageManager).toString())
+        assertEquals("Halani", compose.activity.applicationInfo.loadLabel(compose.activity.packageManager).toString())
         capture("01-onboarding")
         compose.onNodeWithTag("onboarding-language-picker").performClick()
         compose.onNodeWithTag("onboarding-language-es").assertDoesNotExist()

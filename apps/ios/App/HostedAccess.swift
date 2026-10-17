@@ -15,12 +15,12 @@ enum HostedError: LocalizedError {
     }
     var errorDescription: String? {
         return switch self {
-        case .unavailable: "Vani conversations are unavailable right now. Try again later or use your own API key."
-        case .invalidResponse: "Vani couldn’t verify the server response. Please try again."
-        case .secureStorage: "Vani couldn’t read this iPhone’s secure trial record. Unlock your iPhone and try again."
-        case .signInRequired: "Sign in to continue using Vani minutes, or use your own API key."
-        case .noMinutes: "No Vani minutes are available for a new conversation. Check Account or use your own API key."
-        case .unconfirmed: "Vani is checking an earlier conversation. Please try again shortly."
+        case .unavailable: "Halani conversations are unavailable right now. Try again later or use your own API key."
+        case .invalidResponse: "Halani couldn’t verify the server response. Please try again."
+        case .secureStorage: "Halani couldn’t read this iPhone’s secure trial record. Unlock your iPhone and try again."
+        case .signInRequired: "Sign in to continue using Halani minutes, or use your own API key."
+        case .noMinutes: "No Halani minutes are available for a new conversation. Check Account or use your own API key."
+        case .unconfirmed: "Halani is checking an earlier conversation. Please try again shortly."
         case .personalKeyRequired: "Current topics need your API key. Add one in Settings and switch to Your key."
         case .server(let code, _):
             switch code {
@@ -46,11 +46,11 @@ enum HostedError: LocalizedError {
         case .server("helper_session_funding_unavailable", _):
             return MeaningRequestFailure("Extra meanings aren’t available in this conversation.", canRetry: false)
         case .server("helper_output_refused", _):
-            return MeaningRequestFailure("Vani couldn’t explain that passage. Try another one.", canRetry: false)
+            return MeaningRequestFailure("Halani couldn’t explain that passage. Try another one.", canRetry: false)
         case .server("helper_output_incomplete", _):
             return MeaningRequestFailure("That meaning was incomplete. Please try again.")
         case .signInRequired, .server("sign_in_required", _), .server("sign_in_to_continue", _):
-            return MeaningRequestFailure("Sign in to keep using Vani meanings.", canRetry: false)
+            return MeaningRequestFailure("Sign in to keep using Halani meanings.", canRetry: false)
         default:
             return MeaningRequestFailure("Meaning is temporarily unavailable. You can keep talking and try again.")
         }

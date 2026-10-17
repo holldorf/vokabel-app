@@ -138,7 +138,7 @@ final class ManagedAccountStore {
                                            google: google.idToken, googleChallenge: googleChallenge)
             let refreshed = try await client.profile(session: session)
             guard gate.accepts(token), self.session?.accountID == session.accountID else { return }
-            profile = refreshed; message = "Google is connected. Use it to sign in to Vani on Android."
+            profile = refreshed; message = "Google is connected. Use it to sign in to Halani on Android."
         }
     }
     func refreshAndWait() async {
@@ -165,7 +165,7 @@ final class ManagedAccountStore {
             guard gate.accepts(token) else { return }
             try keychain.remove()
             self.session = nil; profile = nil; hostedBalanceMilliseconds = nil; hostedBalance = nil
-            if remoteFailed { message = "Signed out on this iPhone. We couldn’t reach Vani to revoke other sessions; they expire within 24 hours." }
+            if remoteFailed { message = "Signed out on this iPhone. We couldn’t reach Halani to revoke other sessions; they expire within 24 hours." }
         }
     }
     func deleteAccount() {
@@ -186,7 +186,7 @@ final class ManagedAccountStore {
             self.session = nil; profile = nil; hostedBalanceMilliseconds = nil; hostedBalance = nil
             do { try keychain.remove() }
             catch {
-                message = "Account deleted. Vani couldn’t clear its local secure sign-in record. Unlock this iPhone and reopen Account to clear it."
+                message = "Account deleted. Halani couldn’t clear its local secure sign-in record. Unlock this iPhone and reopen Account to clear it."
                 return
             }
             message = "Account deleted. Your learning history remains on this iPhone."
@@ -227,22 +227,22 @@ final class ManagedAccountStore {
     private static func message(for error: Error) -> String {
         if let hosted = error as? HostedError { return hosted.localizedDescription }
         return switch error as? ManagedAccountError {
-        case .secureStorage: "Vani couldn’t update this iPhone’s secure account storage. Unlock the iPhone and try again."
+        case .secureStorage: "Halani couldn’t update this iPhone’s secure account storage. Unlock the iPhone and try again."
         case .server("account_usage_pending"), .server("unresolved_billing"):
             "End your conversation and wait for its minutes to update, then try deleting your account again."
         case .server("sign_in_required"): "Please sign in again. Your learning history is still on this iPhone."
         case .server("rate_limit"): "Please try again later."
-        case .server("same_account_required"): "Use the Apple account already connected to this Vani account."
-        case .server("identity_link_conflict"): "That Google account is already connected to another Vani account. Contact hi@hackmamba.io for help. Your minutes haven’t moved."
+        case .server("same_account_required"): "Use the Apple account already connected to this Halani account."
+        case .server("identity_link_conflict"): "That Google account is already connected to another Halani account. Contact hi@hackmamba.io for help. Your minutes haven’t moved."
         case .server("apple_sign_in_not_ready"), .server("apple_revocation_not_configured"):
             "Sign in with Apple is temporarily unavailable. Please try again later."
         case .server("identity_provider_not_configured"), .unavailable:
             "This sign-in option is unavailable. Please try again later."
         case .purchaseVerificationUnavailable:
-            "Vani couldn’t verify Apple purchases right now. Please try again later."
+            "Halani couldn’t verify Apple purchases right now. Please try again later."
         case .invalidCallback, .invalidResponse, .server("invalid_challenge"):
             "Sign-in couldn’t be verified. Please start again."
-        default: "Vani couldn’t complete that request. Check your connection and try again."
+        default: "Halani couldn’t complete that request. Check your connection and try again."
         }
     }
 }

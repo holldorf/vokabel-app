@@ -73,7 +73,7 @@ import MuralCore
             do { try FileManager.default.removeItem(at: migrationBackupURL) }
             catch CocoaError.fileNoSuchFile { /* Most installations have no migration backup. */ }
             catch {
-                self.error = "Vani couldn’t delete the older learning backup. Your conversations are still here. Please try again."
+                self.error = "Halani couldn’t delete the older learning backup. Your conversations are still here. Please try again."
                 return
             }
         }
@@ -88,7 +88,7 @@ import MuralCore
     }
     private func persist() {
         do { document.payload = try archive.encoded(); try container.mainContext.save(); error = nil }
-        catch { self.error = "Vani couldn’t save your progress. Please export a backup and try again." }
+        catch { self.error = "Halani couldn’t save your progress. Please export a backup and try again." }
     }
 }
 

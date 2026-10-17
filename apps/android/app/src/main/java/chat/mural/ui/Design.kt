@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,14 +28,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.withTransform
-import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.res.stringResource
@@ -139,7 +138,7 @@ fun MuralTheme(content: @Composable () -> Unit) {
 @Composable
 fun BrandMark(modifier: Modifier = Modifier) {
     Image(
-        painter = painterResource(R.drawable.holldorf_logo),
+        painter = painterResource(R.drawable.brand_logo),
         contentDescription = null,
         modifier = modifier.clip(RoundedCornerShape(percent = 22)),
     )
@@ -151,7 +150,21 @@ fun Brand(modifier: Modifier = Modifier) {
     Row(modifier = modifier.semantics(mergeDescendants = true) { contentDescription = appName },
         horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
         BrandMark(Modifier.size(36.dp))
-        Text(stringResource(R.string.app_wordmark), style = rounded(18, 22, FontWeight.ExtraBold), color = MuralColors.Ink)
+        Wordmark()
+    }
+}
+
+/** "halani" with the dot of the final i drawn as the rose voice dot from the app icon. Decorative. */
+@Composable
+fun Wordmark(modifier: Modifier = Modifier) {
+    val style = rounded(18, 22, FontWeight.ExtraBold)
+    Row(modifier.clearAndSetSemantics { }, verticalAlignment = Alignment.Bottom) {
+        Text("halan", style = style, color = MuralColors.Ink)
+        Box(contentAlignment = Alignment.TopCenter) {
+            // U+0131 (dotless i), so the voice dot replaces the glyph's own dot.
+            Text("\u0131", style = style, color = MuralColors.Ink)
+            Box(Modifier.offset(y = 2.dp).size(6.dp).background(MuralColors.Rose, CircleShape))
+        }
     }
 }
 
@@ -180,10 +193,10 @@ internal fun muralPhase(active: Boolean = true, slow: Boolean = false): Float {
         onDispose { owner.lifecycle.removeObserver(observer) }
     }
     if (!active || !foreground || !animations || chat.mural.BuildConfig.BUILD_TYPE == "uiTest") return 0f
-    val phase by rememberInfiniteTransition(label = "Vani motion").animateFloat(
+    val phase by rememberInfiniteTransition(label = "Halani motion").animateFloat(
         initialValue = 0f, targetValue = (PI * 40).toFloat(),
         animationSpec = infiniteRepeatable(tween(if (slow) 897_597 else 174_533,
-            easing = androidx.compose.animation.core.LinearEasing), RepeatMode.Restart), label = "Vani phase")
+            easing = androidx.compose.animation.core.LinearEasing), RepeatMode.Restart), label = "Halani phase")
     return phase
 }
 
@@ -201,86 +214,37 @@ fun SoftAnimatedBackground(modifier: Modifier = Modifier) {
     }
 }
 
+/**
+ * Halani's speaking visual: a glowing aura ring. A soft halo in rose, accent, pink and cream slowly
+ * orbits the ring, and both halo and ring swell with the voice level ([energy], 0..1).
+ * The name stays `MuralOrb` so upstream call sites keep working.
+ */
 @Composable
 fun MuralOrb(energy: Float = 0f, listening: Boolean = false, active: Boolean = true, modifier: Modifier = Modifier) {
     val phase = muralPhase(active)
-    val power = if (android.animation.ValueAnimator.areAnimatorsEnabled()) energy.coerceIn(0f, 1f) else 0f
-    val shader = androidx.compose.runtime.remember {
-        if (android.os.Build.VERSION.SDK_INT >= 33) OrbMesh() else null
-    }
+    val motion = android.animation.ValueAnimator.areAnimatorsEnabled()
+    val power = if (motion) energy.coerceIn(0f, 1f) else 0f
     Canvas(modifier) {
-        // Reserve room for the moving outline and satellites at every rendered size.
-        val side = minOf(size.width, size.height) * .84f
-        val center = Offset(size.width / 2, size.height / 2 - side * .015f + sin(phase * 1.25f) * side * .008f)
-        // A broad feathered shadow, with no hard ellipse underneath the orb.
-        withTransform({
-            translate(size.width / 2, size.height * .94f); scale(1f, .17f, Offset.Zero)
-        }) {
-            drawCircle(Brush.radialGradient(listOf(MuralColors.Orange.copy(alpha = .18f), MuralColors.Orange.copy(alpha = 0f)),
-                center = Offset.Zero, radius = side * .40f), side * .40f, Offset.Zero)
+        val side = minOf(size.width, size.height)
+        val seconds = phase / .72f                       // muralPhase advances .72 rad per second
+        val breath = (sin(seconds * 1.1f) + 1f) / 2f * .06f   // idle breath while nobody speaks
+        val swell = maxOf(power, breath)
+        val scale = .92f + .12f * swell
+        val radius = side * .36f * scale
+        val center = Offset(size.width / 2, size.height / 2)
+        val halo = Brush.sweepGradient(listOf(MuralColors.Rose, MuralColors.Accent, MuralColors.Orange, MuralColors.Ink, MuralColors.Rose), center)
+        val haloWidth = side * (.06f + .08f * swell) * scale
+        withTransform({ rotate(seconds * 60f, center) }) {
+            // Layered strokes stand in for a blur: wide and faint outside, narrower and brighter inside.
+            for (step in 0 until 10) {
+                val k = step / 9f                       // 0 = widest, faintest … 1 = narrowest, brightest
+                drawCircle(halo, radius, center, alpha = .05f + .09f * k, style = Stroke(haloWidth * (2.8f - 2.3f * k)))
+            }
         }
+        drawCircle(MuralColors.Ink.copy(alpha = .85f), radius, center, style = Stroke(maxOf(1.dp.toPx(), side * .012f * scale)))
         if (listening) {
-            drawCircle(MuralColors.Orange.copy(alpha = .15f), side * .50f, center, style = Stroke(1.dp.toPx()))
-            drawCircle(MuralColors.Orange.copy(alpha = .08f), side * .54f, center, style = Stroke(1.dp.toPx()))
+            drawCircle(MuralColors.Accent.copy(alpha = .22f), radius * 1.18f, center, style = Stroke(1.dp.toPx()))
         }
-        val points = (0 until 12).map { index ->
-            val a = index / 12f * PI.toFloat() * 2
-            val wave = sin(a * 3 + phase) * .021f + cos(a * 2 - phase * .7f) * (.012f + power * .025f)
-            val r = side * (.47f + wave) * (1 + power * .045f)
-            Offset(center.x + cos(a) * r, center.y + sin(a) * r)
-        }
-        val path = Path().apply {
-            val start = (points.last() + points.first()) / 2f
-            moveTo(start.x, start.y)
-            points.forEachIndexed { index, p ->
-                val next = (p + points[(index + 1) % 12]) / 2f
-                quadraticTo(p.x, p.y, next.x, next.y)
-            }
-            close()
-        }
-        if (android.os.Build.VERSION.SDK_INT >= 33 && shader != null) {
-            drawPath(path, shader.brush(size, phase))
-        } else {
-            clipPath(path) {
-                drawRect(Brush.linearGradient(listOf(MuralColors.Ink, MuralColors.Rose, MuralColors.Burgundy), Offset.Zero, Offset(size.width * .45f, size.height)))
-                drawRect(Brush.radialGradient(listOf(MuralColors.Rose, MuralColors.Rose.copy(alpha = 0f)), Offset(size.width, size.height * .6f), side * .85f))
-                drawRect(Brush.radialGradient(listOf(MuralColors.Ink.copy(alpha = .6f), MuralColors.Ink.copy(alpha = 0f)), Offset(side * .22f, side * .2f), side * .5f))
-            }
-        }
-        val satelliteRadius = minOf(6.dp.toPx(), side * .025f)
-        drawCircle(Brush.radialGradient(listOf(MuralColors.Ink, MuralColors.Rose, MuralColors.Burgundy.copy(alpha = .5f)),
-            Offset(center.x + side * .55f - satelliteRadius / 2, center.y - side * .24f - satelliteRadius / 2), satelliteRadius * 2),
-            satelliteRadius, Offset(center.x + side * .55f, center.y - side * .24f))
-        drawCircle(MuralColors.Rose, satelliteRadius * .58f, Offset(center.x - side * .54f, center.y + side * .26f))
-    }
-}
-
-@androidx.annotation.RequiresApi(33)
-private class OrbMesh {
-    private val shader = android.graphics.RuntimeShader("""
-        uniform float2 resolution;
-        uniform float phase;
-        float3 row(float u, float3 a, float3 b, float3 c) {
-            return u < .5 ? mix(a,b,smoothstep(0.,.5,u)) : mix(b,c,smoothstep(.5,1.,u));
-        }
-        half4 main(float2 point) {
-            float2 uv = point / resolution;
-            uv.x += sin(phase) * .055 * sin(uv.y * 3.14159);
-            uv.y += cos(phase) * .035 * sin(uv.x * 3.14159);
-            float3 top = row(uv.x, float3(1.,.969,.941), float3(.898,.627,.710), float3(.827,.561,.643));
-            float3 middle = row(uv.x, float3(.827,.561,.643), float3(.502,.063,.184), float3(.898,.627,.710));
-            float3 bottom = row(uv.x, float3(.502,.063,.184), float3(.725,.294,.439), float3(.827,.561,.643));
-            float3 color = uv.y < .5 ? mix(top,middle,smoothstep(0.,.5,uv.y)) : mix(middle,bottom,smoothstep(.5,1.,uv.y));
-            float2 glow = (uv - float2(.28,.21)) / float2(.27,.12);
-            color = mix(color,float3(1.,1.,1.), .25 * exp(-dot(glow,glow)*1.5));
-            return half4(color,1.);
-        }
-    """.trimIndent())
-    private val cachedBrush = androidx.compose.ui.graphics.ShaderBrush(shader)
-    fun brush(size: Size, phase: Float): Brush {
-        shader.setFloatUniform("resolution", size.width, size.height)
-        shader.setFloatUniform("phase", phase)
-        return cachedBrush
     }
 }
 
