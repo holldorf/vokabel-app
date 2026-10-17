@@ -28,6 +28,7 @@ class LargeTypeOnboardingTest {
         compose.onNodeWithTag("onboarding-continue").assertIsDisplayed().performClick()
         compose.onNodeWithTag("onboarding-meaning-picker").performScrollTo().assertIsDisplayed()
         compose.onNodeWithTag("onboarding-continue").assertIsDisplayed().performClick()
-        compose.runOnIdle { assertEquals("es" to "English", selected) }
+        // Only German is selectable in this app, so a stored Spanish choice completes onboarding as German.
+        compose.runOnIdle { assertEquals("de" to "English", selected) }
     }
 }
