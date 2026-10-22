@@ -151,6 +151,10 @@ integration('revoking and re-issuing a license in the same month does not top up
     assert.equal(await admitLicensed(f.db, learner.id), 'VALID');
     assert.equal((await minuteBalance(f.db, learner.id)).availableMilliseconds, 0);
     assert.equal((await f.db.query('SELECT count(*)::int AS n FROM license_monthly_grants WHERE account_id=$1', [learner.id])).rows[0].n, 1);
+    // A grant must belong to the license's own account.
+    const other = await f.account();
+    await assert.rejects(f.db.query("INSERT INTO license_monthly_grants(account_id,month,license_id,granted_ms) VALUES($1,date_trunc('month',now())::date,$2,0)",
+      [other.id, first.id]), /foreign key/);
   } finally { await f.cleanup(); }
 });
 
