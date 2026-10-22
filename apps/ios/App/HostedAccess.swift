@@ -25,6 +25,10 @@ enum HostedError: LocalizedError {
         case .server(let code, _):
             switch code {
             case "insufficient_minutes", "insufficient_credit": HostedError.noMinutes.errorDescription
+            case "license_not_licensed": "Your account doesn’t have a Halani license yet. Ask your course or employer for access, or use your own API key."
+            case "license_suspended": "Your Halani license is paused. Ask your course or employer to reactivate it, or use your own API key."
+            case "license_not_started": "Your Halani license hasn’t started yet. Please try again on its start date."
+            case "license_expired": "Your Halani license has expired. Ask your course or employer to renew it, or use your own API key."
             case "sign_in_required", "sign_in_to_continue": HostedError.signInRequired.errorDescription
             case "live_session_unresolved", "provider_session_unconfirmed", "live_request_already_created": HostedError.unconfirmed.errorDescription
             default: HostedError.unavailable.errorDescription
@@ -45,6 +49,8 @@ enum HostedError: LocalizedError {
             return MeaningRequestFailure("Start a new conversation for more meanings.", canRetry: false)
         case .server("helper_session_funding_unavailable", _):
             return MeaningRequestFailure("Extra meanings aren’t available in this conversation.", canRetry: false)
+        case .server(let code, _) where code.hasPrefix("license_"):
+            return MeaningRequestFailure("Extra meanings need an active Halani license.", canRetry: false)
         case .server("helper_output_refused", _):
             return MeaningRequestFailure("Halani couldn’t explain that passage. Try another one.", canRetry: false)
         case .server("helper_output_incomplete", _):

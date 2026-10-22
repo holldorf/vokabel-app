@@ -7,6 +7,8 @@ import { catalogFromEnvironment, SandboxPayments } from './payments.js';
 import { hasGoogleSignIn, pruneAuthenticationRecords } from './auth.js';
 import { readFile } from 'node:fs/promises';
 import { AppleTokenRevoker } from './apple-revocation.js';
+import { licensesRequired } from './licenses.js';
+import { adminConfig, pruneAdminRecords } from './admin.js';
 import { HostedVoice } from './hosted-voice.js';
 import { OpenAILiveProvider } from './live-provider.js';
 import { AccessRequests, accessRequestConfig, pruneAccessRequests } from './access-requests.js';
@@ -119,13 +121,21 @@ try {
     throw new Error('iOS Google identity configuration is invalid.');
   if (accounts && !hasGoogleSignIn({ googleClientID: process.env.GOOGLE_CLIENT_ID, googleIOSClientIDs, googleAndroidServerClientID, googleAndroidClientIDs }) &&
     !(appleClient && appleRevoker)) throw new Error('No account identity provider configured.');
-  const app = createApp({ db, auth: { googleClientID: process.env.GOOGLE_CLIENT_ID, googleIOSClientIDs, appleClientID: appleClient,
+  // Licenses gate operator-paid conversations; they need accounts to know who is licensed.
+  const licenses = licensesRequired(process.env);
+  if (licenses && !accounts) throw new Error('LICENSES_REQUIRED needs ACCOUNTS_ENABLED=true.');
+  // The admin website uses its own database role; the public API role cannot change licenses.
+  const adminSettings = adminConfig(process.env);
+  const adminDB = adminSettings ? connectDatabase(adminSettings.databaseURL) : undefined;
+  const admin = adminSettings && adminDB ? { db: adminDB, googleClientID: adminSettings.googleClientID, origin: adminSettings.origin } : undefined;
+  const app = createApp({ db, licensesRequired: licenses, admin, auth: { googleClientID: process.env.GOOGLE_CLIENT_ID, googleIOSClientIDs, appleClientID: appleClient,
     googleAndroidServerClientID, googleAndroidClientIDs }, payments, appleRevoker, hosted, hostedHelpers,
     minuteCommerce, accessRequests, accounts, aiReports,guestMinuteAttestor,webPurchases,
     diagnostics });
   const cleanup = setInterval(() => {
     void pruneAuthenticationRecords(db).catch(error => { diagnostics.record('background_failed', { operation: 'retention.accounts' }, error); });
     void pruneAccessRequests(db).catch(error => { diagnostics.record('background_failed', { operation: 'retention.access_requests' }, error); });
+    if (adminDB) void pruneAdminRecords(adminDB).catch(error => { diagnostics.record('background_failed', { operation: 'retention.admin' }, error); });
     void pruneAIReports(db).catch(error => { diagnostics.record('background_failed', { operation: 'retention.reports' }, error); });
     void webPurchases?.prune().catch(error => { diagnostics.record('background_failed', { operation: 'retention.web_purchases' }, error); });
   }, 15 * 60_000);
@@ -143,7 +153,7 @@ try {
   const close = async () => {
     clearInterval(cleanup);clearInterval(helperExpiry);clearInterval(guestLinkCleanup);clearInterval(emailDelivery);
     await guestLinkFlight; await app.close(); await webPurchases?.drainDeliveries(); await hosted?.stop(); await minuteCommerce?.runner.stop();
-    await db.end(); process.exit(0);
+    await db.end(); await adminDB?.end(); process.exit(0);
   };
   process.on('SIGTERM', close); process.on('SIGINT', close);
   await app.listen({ port: Number(process.env.PORT ?? 8080), host: '0.0.0.0' });

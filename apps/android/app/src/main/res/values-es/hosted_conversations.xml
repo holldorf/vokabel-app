@@ -6,6 +6,10 @@
     <string name="hosted_unconfirmed">Halani no ha podido confirmar esta solicitud. No se volverá a enviar automáticamente.</string>
     <string name="hosted_unavailable">Los minutos de Halani no están disponibles para esta solicitud ahora mismo.</string>
     <string name="hosted_no_minutes">No tienes minutos de conversación disponibles.</string>
+    <string name="hosted_license_missing">Tu cuenta todavía no tiene una licencia de Halani. Pide acceso a tu curso o empresa, o usa tu propia clave API.</string>
+    <string name="hosted_license_suspended">Tu licencia de Halani está en pausa. Pide a tu curso o empresa que la reactive, o usa tu propia clave API.</string>
+    <string name="hosted_license_not_started">Tu licencia de Halani aún no ha empezado. Inténtalo de nuevo en su fecha de inicio.</string>
+    <string name="hosted_license_expired">Tu licencia de Halani ha caducado. Pide a tu curso o empresa que la renueve, o usa tu propia clave API.</string>
     <string name="hosted_extra_help_limit">Esta conversación ha alcanzado el límite de explicaciones adicionales.</string>
     <string name="hosted_window_closed">Inicia una nueva conversación para recibir más ayuda. Los significados guardados siguen disponibles.</string>
     <string name="hosted_request_failed">Halani no ha podido completar esta solicitud. Vuelve a intentarlo más tarde.</string>

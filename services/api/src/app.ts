@@ -27,6 +27,9 @@ import { HOSTED_HELPER_BODY_LIMIT, type HostedHelpers } from './hosted-helpers.j
 import { Diagnostics, errorReference } from './diagnostics.js';
 import { startupDiagnostic, type StartupDiagnostic } from './startup-diagnostics.js';
 import { WEB_PURCHASE_PATH, type WebPurchases } from './web-purchases.js';
+import { admitLicensed, licenseStatus } from './licenses.js';
+import type { AdminConfig } from './admin.js';
+import { registerAdminRoutes } from './admin-http.js';
 
 declare module 'fastify' {
   interface FastifyContextConfig { rateLimit?: { max: number; timeWindow: number } }
@@ -39,7 +42,11 @@ export interface Services { diagnostics?: Diagnostics; db: Database; auth: AuthC
   minuteCommerce?: { purchases: MinutePurchases; aiPurchases?: AIValuePurchases; fulfillment?: PurchaseFulfillmentRouter;
     stripe?: StripeMinuteProvider; play?: PlayMinuteProvider; apple?:AppleMinuteProvider; appleSandbox?:AppleMinuteProvider;
     appleScopes?:ApplePurchaseScopes; playNotifications?: Pick<PlayRtdnSubscriber,'isOperational'> };
-  accounts?: { admission: AuthAdmission; identityVerifier?: typeof verifyIdentity } }
+  accounts?: { admission: AuthAdmission; identityVerifier?: typeof verifyIdentity };
+  /** When true, hosted conversations also require a valid license (see src/licenses.ts). */
+  licensesRequired?: boolean;
+  /** Admin website and API on a separate database role (ADMIN_ENABLED). */
+  admin?: AdminConfig }
 const accountPaths = new Set(['/v1/auth/challenge', '/v1/auth/exchange', '/v1/auth/sign-out', '/v1/account', '/v1/wallet', '/v1/minutes/welcome', '/v1/minutes/link-guest',
   '/v1/account/connect-google',
   '/v1/minutes/orders', '/v1/minutes/orders/by-key/:key', '/v1/minutes/orders/:id', '/v1/minutes/orders/:id/play', '/v1/minutes/play/recover','/v1/minutes/orders/:id/apple','/v1/minutes/apple/recover']);
@@ -156,6 +163,7 @@ export function createApp(services: Services) {
     if (path === ACCESS_REQUEST_PATH || path === AI_REPORT_PATH || path === '/healthz') return;
     if (!routeLimit) limitNetworkRequest(request, reply, paymentReadOptions.config.rateLimit);
   });
+  if (services.admin) registerAdminRoutes(app, services.admin);
   app.setErrorHandler((error, request, reply) => {
     const purchaseReconciliation = error && typeof error === 'object' && 'code' in error && 'message' in error && error.code === 'P0001' &&
         error.message === 'minute_purchase_reconciliation_required';
@@ -342,10 +350,19 @@ export function createApp(services: Services) {
       googleChallengeID:uuid(stringField(body,'googleChallengeID',36)).toLowerCase(),googleToken:stringField(body,'googleToken',16384)
     },services.auth,services.accounts?.identityVerifier);
   });
-  app.get('/v1/minutes', paymentReadOptions, async request => conversationBalance(db, await authenticate(db, request.headers.authorization, true),
+  // Licensed accounts receive this month's minutes before any balance is shown or spent; denies fail closed.
+  const licenseGate = async (account: string) => {
+    if (!services.licensesRequired) return 'VALID' as const;
+    return admitLicensed(db, account);
+  };
+  app.get('/v1/minutes', paymentReadOptions, async request => {
+    const account = await authenticate(db, request.headers.authorization, true);
+    await licenseGate(account);
+    return conversationBalance(db, account,
     services.hosted?.publicMinuteAccess===true, services.hosted?.publicPaidAccess ? { enabled: true,
       estimatedNanoUSDPerMinute: services.hosted.estimatedNanoUSDPerMinute, minimumSessionNanoUSD: services.hosted.minimumPaidSessionNanoUSD } : undefined,
-    services.hosted?.realFundedAccess ? 'live' : await fundingScope(request),services.hosted?.realFundedAccess===true));
+    services.hosted?.realFundedAccess ? 'live' : await fundingScope(request),services.hosted?.realFundedAccess===true);
+  });
   app.post('/v1/guest/minutes', { bodyLimit: 1024 }, async request => {
     const proof = objectBody(request);
     try { return { available: true, ...await startGuestMinutes(db, proof, services.guestMinuteAttestor ?? new UnconfiguredGuestMinuteAttestor()) }; }
@@ -554,12 +571,17 @@ export function createApp(services: Services) {
   app.get('/v1/live/capabilities', async request => {
     if (!services.hosted?.minuteFunded || !services.hosted.available || !services.hostedHelpers || !request.headers.authorization) return { hostedMinutes: false };
     const account = await authenticate(db, request.headers.authorization, true);
-    return { hostedMinutes: services.hosted.allows(account) && services.hostedHelpers.allows(account), experimental: true };
+    const license = await licenseGate(account);
+    if (license !== 'VALID') return { hostedMinutes: false, license };
+    return { hostedMinutes: services.hosted.allows(account) && services.hostedHelpers.allows(account), experimental: true,
+      ...(services.licensesRequired ? { license } : {}) };
   });
   app.post('/v1/live/sessions', async request => {
     if (!services.hosted?.available) throw new ServiceError('hosted_voice_not_ready', 503);
     if (services.hosted.minuteFunded && !services.hostedHelpers) throw new ServiceError('hosted_helpers_not_ready', 503);
     const account = await authenticate(db, request.headers.authorization, services.hosted.minuteFunded), body = objectBody(request);
+    const license = await licenseGate(account);
+    if (license !== 'VALID') throw new ServiceError(`license_${license.toLowerCase()}`, 403);
     if (Object.keys(body).some(key => !['sdp','language','instructions','history','requestedMilliseconds'].includes(key))) throw new ServiceError('invalid_request');
     if (body.requestedMilliseconds !== undefined && (typeof body.requestedMilliseconds !== 'number' ||
         !Number.isSafeInteger(body.requestedMilliseconds) || body.requestedMilliseconds < 60_000 || body.requestedMilliseconds > 3_600_000))
@@ -594,6 +616,11 @@ export function createApp(services: Services) {
   app.post('/v1/live/sessions/:id/helpers', { bodyLimit: HOSTED_HELPER_BODY_LIMIT }, async (request, reply) => {
     if (!services.hosted?.minuteFunded || !services.hostedHelpers) throw new ServiceError('hosted_helpers_not_ready', 503);
     const account = await authenticate(db, request.headers.authorization, true);
+    if (services.licensesRequired) {
+      // Read-only check on every helper call: suspending or revoking stops paid helpers mid-session too.
+      const license = (await licenseStatus(db, account)).code;
+      if (license !== 'VALID') throw new ServiceError(`license_${license.toLowerCase()}`, 403);
+    }
     const sessionID = uuid((request.params as { id: string }).id);
     // Streaming is explicit opt-in; wildcard clients keep the existing JSON contract.
     const wantsStream = request.headers.accept?.split(',').some(value => {

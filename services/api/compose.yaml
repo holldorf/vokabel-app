@@ -44,6 +44,12 @@ services:
       STRIPE_TEST_PRICE_25_USD: ${STRIPE_TEST_PRICE_25_USD:-}
       STRIPE_TEST_PAYMENT_FEE_10_MINOR: ${STRIPE_TEST_PAYMENT_FEE_10_MINOR:-}
       STRIPE_TEST_PAYMENT_FEE_25_MINOR: ${STRIPE_TEST_PAYMENT_FEE_25_MINOR:-}
+      # Licenses and the admin page (/admin) are off unless explicitly enabled; see README "Licenses".
+      LICENSES_REQUIRED: ${LICENSES_REQUIRED:-false}
+      ADMIN_ENABLED: ${ADMIN_ENABLED:-false}
+      ADMIN_DATABASE_URL: ${ADMIN_DATABASE_URL:-}
+      ADMIN_GOOGLE_CLIENT_ID: ${ADMIN_GOOGLE_CLIENT_ID:-}
+      ADMIN_ORIGIN: https://${API_DOMAIN:?Set the API domain}
     depends_on:
       migrate:
         condition: service_completed_successfully

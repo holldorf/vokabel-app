@@ -14,6 +14,7 @@ COPY --chown=node:node package*.json ./
 RUN npm ci --omit=dev && npm cache clean --force
 COPY --from=build --chown=node:node /app/dist ./dist
 COPY --chown=node:node migrations ./migrations
+COPY --chown=node:node admin ./admin
 USER node
 EXPOSE 8080
 CMD ["node", "dist/src/main.js"]

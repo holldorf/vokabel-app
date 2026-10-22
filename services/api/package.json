@@ -12,6 +12,8 @@
     "start": "node --env-file-if-exists=.env dist/src/main.js",
     "migrate": "tsx --env-file=.env src/migrate.ts",
     "minutes-admin": "tsx --env-file-if-exists=.env src/minutes-admin.ts",
+    "licenses-admin": "tsx --env-file-if-exists=.env src/licenses-admin.ts",
+    "admin-users": "tsx --env-file-if-exists=.env src/admin.ts",
     "test": "tsx --test --test-concurrency=1 tests/*.test.ts",
     "check": "tsc --noEmit"
   },

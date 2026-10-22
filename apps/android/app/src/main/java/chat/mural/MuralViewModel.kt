@@ -57,6 +57,10 @@ internal fun hostedErrorMessageRes(failure: HostedFailure): Int = when (failure)
     is HostedFailure.Http -> when {
         needsAccountRecovery(failure) -> R.string.hosted_sign_in_again
         failure.code in setOf("insufficient_minutes", "insufficient_credit") -> R.string.hosted_no_minutes
+        failure.code == "license_not_licensed" -> R.string.hosted_license_missing
+        failure.code == "license_suspended" -> R.string.hosted_license_suspended
+        failure.code == "license_not_started" -> R.string.hosted_license_not_started
+        failure.code == "license_expired" -> R.string.hosted_license_expired
         failure.code == "helper_session_limit" && failure.retryable == true -> R.string.hosted_help_busy
         failure.code == "helper_concurrency_limit" -> R.string.hosted_help_busy
         failure.code in setOf("helper_budget_exhausted", "helper_session_limit") -> R.string.hosted_extra_help_limit

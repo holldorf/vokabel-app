@@ -99,6 +99,30 @@ All monetary strings are integer **nanoUSD**: 1 USD = 1,000,000,000 nanoUSD. A d
 
 Error responses contain a safe `error.code` only. Request bodies, keys, ID tokens, bearer tokens, Stripe payloads, and conversations are not logged. Expired authentication records are pruned every 15 minutes. The basic in-memory rate limit does not trust forwarded client-IP headers; behind Caddy it applies conservatively to the proxy address. Configure and test a trusted-proxy policy before scaling it.
 
+## Licenses
+
+With `LICENSES_REQUIRED=true` (and `ACCOUNTS_ENABLED=true`) only accounts with a valid license can start operator-paid conversations or use paid helpers; everyone else receives `403 license_not_licensed`, `license_suspended`, `license_not_started` or `license_expired`, and `/v1/live/capabilities` reports the same code. A valid license tops the account up to its monthly minute allowance once per calendar month (UTC) on first use; unused licensed minutes do not accumulate beyond one month's allowance.
+
+Apply migration `036_licenses.sql`, then `operations/license-runtime-grants.sql` after the minute runtime grants. The API role can read licenses and record the monthly top-up, but cannot issue, change or revoke licenses or read the audit trail. Operators manage licenses on a separate connection:
+
+```sh
+echo '{"email":"learner@example.com","label":"Kurs Oktober","minutesPerMonth":300,"expiresAt":"2027-03-31T23:59:59Z","actor":"admin@example.com","reason":"Pilotgruppe"}' | npm run licenses-admin issue
+npm run licenses-admin list
+echo '{"id":"<license id>","actor":"admin@example.com","reason":"Kurs beendet"}' | npm run licenses-admin revoke
+```
+
+Other commands: `suspend`, `reinstate`, `renew` (`expiresAt`), `set-minutes` (`minutesPerMonth`), `events` (`id`). Every change needs `actor` and `reason` and is recorded in `license_events`. Design: [docs/licenses-design.md](docs/licenses-design.md).
+
+### Admin page
+
+`https://<API_DOMAIN>/admin` is a German admin page for licenses, the waitlist and admins. It is off unless `ADMIN_ENABLED=true`. To enable it:
+
+1. Apply migration `037_admin.sql`. Create a login role `mural_admin` with its own password, apply `operations/admin-role-grants.sql`, and apply `operations/admin-runtime-grants.sql` so the public API role cannot see admin data. Set `ADMIN_DATABASE_URL` to the `mural_admin` connection; it must differ from `DATABASE_URL`.
+2. In Google Cloud, create an OAuth client of type *Web application* with `https://<API_DOMAIN>` as authorized JavaScript origin, and set `ADMIN_GOOGLE_CLIENT_ID`. `ADMIN_ORIGIN` is that origin (Compose sets it from `API_DOMAIN`).
+3. Add the first owner on the server: `ADMIN_DATABASE_URL=... npm run admin-users set <email> owner`. Owners add further admins on the page.
+
+Roles: *Eigentümer* (owner) manages admins and licenses, *Verwalter* (manager) manages licenses, *Nur lesen* (viewer) only reads. Sign-in accepts only a Google-verified email listed as admin, uses a single-use nonce, and sets an 8-hour `HttpOnly`, `Secure`, `SameSite=Strict` session cookie limited to `/v1/admin`; only its SHA-256 digest is stored. Admin API calls need the `x-halani-admin` header and reject foreign `Origin`s. The page is a fixed set of files with a strict Content Security Policy and inserts all data as text.
+
 ## Restricted voice experiment
 
 The default remains `HOSTED_VOICE_EXPERIMENTAL=false`. The production Compose file deliberately does not forward hosted-provider credentials. To conduct a separately authorized engineering test, an operator must supply all of the following through a private deployment override:

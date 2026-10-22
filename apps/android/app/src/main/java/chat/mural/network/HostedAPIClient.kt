@@ -352,7 +352,8 @@ class HostedAPIClient internal constructor(
             "live_session_unresolved", "live_session_not_found", "provider_session_unconfirmed", "provider_connection_lost",
             "helper_request_already_attempted", "helper_response_uncertain", "helper_session_limit", "helper_concurrency_limit",
             "helper_budget_exhausted", "helper_session_window_closed", "helper_output_refused", "helper_output_incomplete",
-            "helper_session_funding_unavailable", "helper_minute_session_required", "helper_provider_reconciliation_required")
+            "helper_session_funding_unavailable", "helper_minute_session_required", "helper_provider_reconciliation_required",
+            "license_not_licensed", "license_suspended", "license_not_started", "license_expired")
         private val HOSTED_CLEANUP = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     }
 }

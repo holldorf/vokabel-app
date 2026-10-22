@@ -221,7 +221,8 @@ export async function deleteAccount(db: Database, account: string, appleRevoker?
       UNION ALL SELECT 1 FROM hosted_close_intents WHERE account_id=$1
       UNION ALL SELECT 1 FROM minute_campaign_recipients WHERE account_id=$1
       UNION ALL SELECT 1 FROM minute_guest_links WHERE member_account_id=$1 OR guest_account_id=$1
-      UNION ALL SELECT 1 FROM minute_guest_link_intents WHERE member_account_id=$1 OR guest_account_id=$1 LIMIT 1`, [account]);
+      UNION ALL SELECT 1 FROM minute_guest_link_intents WHERE member_account_id=$1 OR guest_account_id=$1
+      UNION ALL SELECT 1 FROM licenses WHERE account_id=$1 LIMIT 1`, [account]);
     if (records.rowCount) {
       await sql.query('UPDATE accounts SET email=NULL,deleted_at=now() WHERE id=$1', [account]);
       return { retainedFinancialRecords: true };

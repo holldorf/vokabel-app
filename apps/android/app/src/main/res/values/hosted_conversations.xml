@@ -6,6 +6,10 @@
     <string name="hosted_unconfirmed">Halani could not confirm that request. It will not be sent again automatically.</string>
     <string name="hosted_unavailable">Halani minutes are not available for this request right now.</string>
     <string name="hosted_no_minutes">You have no conversation minutes available.</string>
+    <string name="hosted_license_missing">Your account doesn’t have a Halani license yet. Ask your course or employer for access, or use your own API key.</string>
+    <string name="hosted_license_suspended">Your Halani license is paused. Ask your course or employer to reactivate it, or use your own API key.</string>
+    <string name="hosted_license_not_started">Your Halani license hasn’t started yet. Please try again on its start date.</string>
+    <string name="hosted_license_expired">Your Halani license has expired. Ask your course or employer to renew it, or use your own API key.</string>
     <string name="hosted_extra_help_limit">This conversation has reached its limit for extra explanations.</string>
     <string name="hosted_window_closed">Start a new conversation for more help. Your saved meanings are still available.</string>
     <string name="hosted_request_failed">Halani could not complete that request. Please try again later.</string>
